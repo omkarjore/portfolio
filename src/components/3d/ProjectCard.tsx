@@ -2,17 +2,21 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { useProjectContext } from '../../context/ProjectContext';
 
 interface ProjectCardProps {
+  id: string;
   position: [number, number, number];
   title: string;
   description: string;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
+  id,
   position,
   title,
 }) => {
+  const { expandProject } = useProjectContext();
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -29,6 +33,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       position={position}
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
+      onClick={() => expandProject(id)}
       scale={hovered ? 1.1 : 1}
     >
       <boxGeometry args={[2, 2.5, 0.1]} />

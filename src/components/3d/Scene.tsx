@@ -17,6 +17,7 @@ export const Scene: React.FC = () => {
       {projects.map((project) => (
         <ProjectCard
           key={project.id}
+          id={project.id}
           position={project.position}
           title={project.title}
           description={project.description}
