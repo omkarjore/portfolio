@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import { LoadingScreen } from './components/ui/LoadingScreen';
 import { Scene } from './components/3d/Scene';
 import { ProjectModal } from './components/ui/ProjectModal';
+import { Navigation } from './components/layout/Navigation';
 
 export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,7 @@ export const App: React.FC = () => {
         <>
           <Scene />
           <ProjectModal />
+          <Navigation />
         </>
       )}
     </div>
