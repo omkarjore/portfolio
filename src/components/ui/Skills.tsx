@@ -1,48 +1,3 @@
-# Story 2.2: Skills & Tech Stack Section
-
-## Status
-Ready for Review
-
-## Story
-**As a** technical recruiter,
-**I want** to see a comprehensive list of technical skills and technologies,
-**so that** I can quickly assess if the candidate matches our technical requirements.
-
-## Acceptance Criteria
-
-1. `src/components/ui/Skills.jsx` component created
-2. Skills organized in categories:
-   - **Primary Expertise:** C# .NET 8, .NET Framework, Autodesk APIs (Navisworks, AutoCAD), Object-Oriented Programming
-   - **Languages:** C#, Java, HTML, CSS
-   - **Tools & Platforms:** Visual Studio 2022, Cursor IDE, ETL AB-INITIO, Git/GitHub
-   - **Specializations:** CAD Plugin Development, API Integration, Automation Solutions
-3. Skills displayed in clean, scannable format (list, grid, or tags)
-4. Visual distinction between primary and secondary skills (typography, color, or grouping)
-5. No skill bars or percentage indicators (avoid subjective self-assessment)
-6. Section includes link to GitHub profile: "View code samples on GitHub"
-7. Skills list matches resume content (no discrepancies)
-8. Section styled with Tailwind CSS for visual hierarchy
-9. Section accessible via navigation menu link
-10. Skills section responsive on desktop viewports
-
-## Tasks / Subtasks
-
-- [x] Create Skills component (AC: 1, 8)
-- [x] Define skills data structure with categories (AC: 2, 7)
-- [x] Implement grid/tag display layout (AC: 3, 4, 5)
-- [x] Add GitHub profile link (AC: 6)
-- [x] Implement "Return to 3D Experience" button (AC: 9)
-- [x] Connect to navigation menu (AC: 9)
-- [x] Update App.tsx routing (AC: 9)
-- [x] Test skills section (AC: 3, 4, 6, 10)
-
-## Dev Notes
-
-### Skills Component Template
-
-```typescript
-// src/components/ui/Skills.tsx
-
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 
@@ -71,9 +26,10 @@ export const Skills: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Return to 3D Button */}
         <button
           onClick={() => setCurrentView('home')}
-          className="mb-8 flex items-center text-cyan-600 hover:text-cyan-700 transition-colors"
+          className="mb-8 flex items-center text-cyan-600 hover:text-cyan-700 transition-colors font-semibold"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -163,70 +119,3 @@ export const Skills: React.FC = () => {
     </div>
   );
 };
-```
-
-### Visual Distinction Strategy
-- **Primary Expertise:** Larger tags (text-lg, px-4 py-2), cyan background, font-semibold
-- **Secondary Skills:** Smaller tags (px-3 py-2), gray background, normal weight
-- **Specializations:** Blue background, medium weight
-
-### Testing
-1. Skills display in categorized format
-2. Primary skills visually distinct
-3. GitHub link opens in new tab
-4. Return to 3D button works
-5. Responsive layout
-
-## Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|---------|
-| 2025-10-31 | 1.0 | Initial story creation | Bob (Scrum Master) |
-| 2025-10-31 | 1.1 | Story implementation completed | James (Dev Agent) |
-
----
-
-## Dev Agent Record
-### Agent Model Used
-claude-sonnet-4-5-20250929
-
-### Debug Log References
-None
-
-### Completion Notes List
-- Created Skills component with categorized skills data structure
-- Organized skills into 4 categories: Primary Expertise, Languages, Tools & Platforms, Specializations
-- Primary Expertise: C# .NET 8, .NET Framework, Autodesk APIs (Navisworks, AutoCAD), Object-Oriented Programming
-- Languages: C#, Java, HTML, CSS
-- Tools & Platforms: Visual Studio 2022, Cursor IDE, ETL AB-INITIO, Git/GitHub
-- Specializations: CAD Plugin Development, API Integration, Automation Solutions
-- Implemented tag-based display with flex-wrap layout
-- Visual distinction for skill categories:
-  - Primary: Larger tags (text-lg, px-4 py-2), cyan background (bg-cyan-100), font-semibold
-  - Languages & Tools: Smaller tags (px-3 py-2), gray background (bg-gray-200)
-  - Specializations: Blue background (bg-blue-100), medium font weight
-- No skill bars or percentage indicators (per AC 5)
-- Added GitHub profile link with GitHub icon and "View code samples on GitHub" text
-- GitHub link opens in new tab (target="_blank", rel="noopener noreferrer")
-- Implemented "Return to 3D Experience" button with left arrow icon
-- Button navigates to home view using setCurrentView('home')
-- Styled section with white card on gray-50 background
-- Used proper spacing (py-16, px-4, p-8, md:p-12, mb-10)
-- Section heading (text-4xl) and category headings (text-2xl for primary, text-xl for others)
-- Skills link in Navigation.tsx already configured (no changes needed)
-- Updated App.tsx to conditionally render Skills component based on currentView
-- Added overflow-y-auto scrollable container for Skills section
-- Production build successful in 5.36s with no errors
-- Linting passes with no errors
-- Navigation flow working: Menu → Skills → Return to 3D
-
-### File List
-**Created:**
-- `src/components/ui/Skills.tsx` - Skills & Tech Stack section component with categorized skills
-
-**Modified:**
-- `src/App.tsx` - Added conditional rendering for Skills component based on currentView
-
----
-
-## QA Results
-_To be filled by QA Agent_

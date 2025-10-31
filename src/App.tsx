@@ -5,6 +5,7 @@ import { Scene } from './components/3d/Scene';
 import { ProjectModal } from './components/ui/ProjectModal';
 import { Navigation } from './components/layout/Navigation';
 import { About } from './components/ui/About';
+import { Skills } from './components/ui/Skills';
 import { useAppContext } from './context/AppContext';
 
 export const App: React.FC = () => {
@@ -50,6 +51,10 @@ export const App: React.FC = () => {
           ) : currentView === 'about' ? (
             <div className="w-full h-full overflow-y-auto">
               <About />
+            </div>
+          ) : currentView === 'skills' ? (
+            <div className="w-full h-full overflow-y-auto">
+              <Skills />
             </div>
           ) : null}
           <Navigation />
