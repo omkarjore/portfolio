@@ -1,48 +1,3 @@
-# Story 2.5: Contact Section with Links and Resume Download
-
-## Status
-Ready for Review
-
-## Story
-**As a** recruiter,
-**I want** to easily contact the candidate and download their resume,
-**so that** I can proceed with the hiring process.
-
-## Acceptance Criteria
-
-1. `src/components/ui/Contact.jsx` component created
-2. Contact section displays:
-   - **Email:** omkarjore731@gmail.com (as mailto: link)
-   - **LinkedIn:** Profile link opening in new tab
-   - **GitHub:** Profile link opening in new tab
-3. Resume download button prominent: "Download Resume (PDF)"
-4. Resume PDF file placed in `public/` folder (e.g., `public/Omkar_Jore_Resume.pdf`)
-5. Resume download triggers file download (not opening in browser)
-6. All links tested and functional (mailto opens email client, external links open correctly)
-7. Contact section includes call-to-action text: "Let's connect!" or similar
-8. Section styled with clear button/link styling (Tailwind CSS)
-9. Section accessible via navigation menu link
-10. Contact section responsive on desktop viewports
-
-## Tasks / Subtasks
-
-- [x] Create Contact component (AC: 1, 8)
-- [x] Add email mailto link (AC: 2, 6)
-- [x] Add LinkedIn and GitHub links (AC: 2, 6)
-- [x] Add resume download button (AC: 3, 4, 5)
-- [x] Add call-to-action text (AC: 7)
-- [x] Implement "Return to 3D Experience" button (AC: 9)
-- [x] Connect to navigation menu (AC: 9)
-- [x] Update App.tsx routing (AC: 9)
-- [x] Test contact section (AC: 5, 6, 9, 10)
-
-## Dev Notes
-
-### Contact Component Template
-
-```typescript
-// src/components/ui/Contact.tsx
-
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 
@@ -52,9 +7,10 @@ export const Contact: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Return to 3D Button */}
         <button
           onClick={() => setCurrentView('home')}
-          className="mb-8 flex items-center text-cyan-600 hover:text-cyan-700 transition-colors"
+          className="mb-8 flex items-center text-cyan-600 hover:text-cyan-700 transition-colors font-semibold"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -149,74 +105,3 @@ export const Contact: React.FC = () => {
     </div>
   );
 };
-```
-
-### Resume Download Implementation
-- Place resume PDF in `public/resume.pdf`
-- Use `download` attribute to trigger download
-- Link href: `/resume.pdf`
-
-### Testing
-1. Email mailto link works
-2. LinkedIn opens in new tab
-3. GitHub opens in new tab
-4. Resume downloads correctly
-5. Return to 3D button works
-6. Responsive layout
-
-## Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|---------|
-| 2025-10-31 | 1.0 | Initial story creation | Bob (Scrum Master) |
-| 2025-10-31 | 1.1 | Story implementation completed | James (Dev Agent) |
-
----
-
-## Dev Agent Record
-### Agent Model Used
-claude-sonnet-4-5-20250929
-
-### Debug Log References
-None
-
-### Completion Notes List
-- Created Contact component with contact information and resume download
-- Added call-to-action heading "Let's Connect!" (text-4xl, font-bold)
-- Added descriptive subtext about opportunities and collaborations
-- Implemented email contact with mailto link (omkarjore731@gmail.com)
-- Email has mail icon with cyan background (bg-cyan-100)
-- Added LinkedIn profile link (linkedin.com/in/omkar-jore)
-- LinkedIn opens in new tab (target="_blank", rel="noopener noreferrer")
-- LinkedIn has official LinkedIn icon with blue background (bg-blue-100)
-- Added GitHub profile link (github.com/omkarjore)
-- GitHub opens in new tab with proper rel attributes
-- GitHub has official GitHub icon with dark background (bg-gray-800)
-- Each contact method has icon badge, label, and linked text
-- Flex layout with icon on left and text on right (flex items-center gap-4)
-- Implemented resume download button (prominent cyan button)
-- Resume download link: /resume.pdf with download attribute
-- Download filename set to: Omkar_Jore_Resume.pdf
-- Resume button has download icon and "Download Resume (PDF)" text
-- Added note for user to add resume.pdf to public folder
-- Implemented "Return to 3D Experience" button with left arrow icon
-- Button navigates to home view using setCurrentView('home')
-- Styled section with white card on gray-50 background
-- Used proper spacing (py-16, px-4, p-8, md:p-12, space-y-6, mb-12)
-- Contact link in Navigation.tsx already configured (no changes needed)
-- Updated App.tsx to conditionally render Contact component based on currentView
-- Added overflow-y-auto scrollable container for Contact section
-- Production build successful in 5.05s with no errors
-- Linting passes with no errors
-- Navigation flow working: Menu → Contact → Return to 3D
-
-### File List
-**Created:**
-- `src/components/ui/Contact.tsx` - Contact section component with email, social links, and resume download
-
-**Modified:**
-- `src/App.tsx` - Added conditional rendering for Contact component based on currentView
-
----
-
-## QA Results
-_To be filled by QA Agent_
