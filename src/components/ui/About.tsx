@@ -26,7 +26,8 @@ export const About: React.FC = () => {
               <img
                 src="/profile-photo.jpg"
                 alt="Omkar Jore - CAD Automation Developer"
-                className="w-48 h-48 rounded-full object-cover shadow-lg border-4 border-gray-100"
+                className="w-48 h-48 rounded-full object-cover object-top shadow-lg border-4 border-gray-100"
+                style={{ objectPosition: '50% 20%' }}
               />
             </div>
 
