@@ -1,7 +1,8 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Lights } from './Lights';
-import { TestBox } from './TestBox';
+import { ProjectCard } from './ProjectCard';
+import { projects } from '../../data/projects';
 
 export const Scene: React.FC = () => {
   return (
@@ -11,7 +12,14 @@ export const Scene: React.FC = () => {
     >
       <color attach="background" args={['#111827']} />
       <Lights />
-      <TestBox />
+      {projects.map((project) => (
+        <ProjectCard
+          key={project.id}
+          position={project.position}
+          title={project.title}
+          description={project.description}
+        />
+      ))}
     </Canvas>
   );
 };
