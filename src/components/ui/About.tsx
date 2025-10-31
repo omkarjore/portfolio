@@ -21,17 +21,13 @@ export const About: React.FC = () => {
         {/* About Content */}
         <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Headshot Photo Placeholder */}
+            {/* Professional Photo */}
             <div className="flex-shrink-0">
-              <div className="w-48 h-48 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                {/* Placeholder icon */}
-                <svg className="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Add headshot.jpg to public folder
-              </p>
+              <img
+                src="/profile-photo.jpg"
+                alt="Omkar Jore - CAD Automation Developer"
+                className="w-48 h-48 rounded-full object-cover shadow-lg border-4 border-gray-100"
+              />
             </div>
 
             {/* Bio Content */}
