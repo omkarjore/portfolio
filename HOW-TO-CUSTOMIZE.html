@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Customization Guide - Omkar Jore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tech-card {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .tech-card strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .danger-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: none;
+            color: #f8f8f2;
+            padding: 0;
+        }
+
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+            padding-left: 50px;
+            position: relative;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 12px;
+            font-size: 1.4em;
+            color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .url-box {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .url-box a {
+            color: white;
+            font-size: 1.2em;
+            text-decoration: none;
+            border-bottom: 2px solid white;
+        }
+
+        .url-box a:hover {
+            opacity: 0.8;
+        }
+
+        .security-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 6px;
+        }
+
+        .check-icon {
+            color: #28a745;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .cross-icon {
+            color: #dc3545;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .tech-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Portfolio Customization Guide</h1>
+            <p>Complete guide to customize your 3D portfolio website</p>
+        </div>
+
+        <div class="content">
+            <!-- Technologies Section -->
+            <div class="section">
+                <h2><span class="icon">🛠️</span> Technologies Used in Your Portfolio</h2>
+
+                <div class="tech-list">
+                    <div class="tech-card">
+                        <strong>React 18.2.0</strong>
+                        JavaScript library for building user interfaces
+                    </div>
+                    <div class="tech-card">
+                        <strong>TypeScript 5.0+</strong>
+                        Typed superset of JavaScript for better code quality
+                    </div>
+                    <div class="tech-card">
+                        <strong>Vite 7.1.12</strong>
+                        Fast build tool and development server
+                    </div>
+                    <div class="tech-card">
+                        <strong>Three.js</strong>
+                        3D graphics library for the web
+                    </div>
+                    <div class="tech-card">
+                        <strong>React Three Fiber</strong>
+                        React renderer for Three.js
+                    </div>
+                    <div class="tech-card">
+                        <strong>Tailwind CSS v4</strong>
+                        Utility-first CSS framework
+                    </div>
+                    <div class="tech-card">
+                        <strong>Framer Motion</strong>
+                        Animation library for React
+                    </div>
+                    <div class="tech-card">
+                        <strong>Vercel</strong>
+                        Cloud platform for hosting (FREE)
+                    </div>
+                </div>
+
+                <div class="url-box">
+                    <p><strong>Your Live Portfolio:</strong></p>
+                    <a href="https://portfolio-gray-beta-31.vercel.app" target="_blank">https://portfolio-gray-beta-31.vercel.app</a>
+                </div>
+            </div>
+
+            <!-- Photo Section -->
+            <div class="section">
+                <h2><span class="icon">📷</span> How to Add Your Photo</h2>
+
+                <h3>Step-by-Step Instructions:</h3>
+                <ol class="steps">
+                    <li>
+                        <strong>Prepare your photo</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>Use a professional headshot photo</li>
+                            <li>Recommended size: 400x400 pixels (square)</li>
+                            <li>Format: JPG or PNG</li>
+                            <li>Keep file size under 500KB</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Save photo to project</strong>
+                        <p>Place your photo in: <code>public/profile-photo.jpg</code></p>
+                    </li>
+                    <li>
+                        <strong>Update the About component</strong>
+                        <p>Open file: <code>src/components/ui/About.tsx</code></p>
+                        <p>Find this section (around line 24):</p>
+                        <pre><code>&lt;div className="w-48 h-48 bg-gray-200 rounded-full..."&gt;
+  &lt;!-- Placeholder icon --&gt;
+  &lt;svg className="w-24 h-24 text-gray-400"...&gt;
+&lt;/div&gt;</code></pre>
+                        <p><strong>Replace with:</strong></p>
+                        <pre><code>&lt;img
+  src="/profile-photo.jpg"
+  alt="Omkar Jore"
+  className="w-48 h-48 rounded-full object-cover mb-6 md:mb-0 md:mr-8 flex-shrink-0 shadow-lg"
+/&gt;</code></pre>
+                    </li>
+                    <li>
+                        <strong>Deploy changes</strong>
+                        <pre><code>git add public/profile-photo.jpg src/components/ui/About.tsx
+git commit -m "Add profile photo"
+git push</code></pre>
+                        <p style="margin-top: 10px;">Wait ~2 minutes for Vercel to auto-deploy!</p>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Content Changes Section -->
+            <div class="section">
+                <h2><span class="icon">✏️</span> How to Change Content</h2>
+
+                <h3>Quick Reference Table:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>What to Change</th>
+                            <th>File Location</th>
+                            <th>Approx. Line</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Your Photo</strong></td>
+                            <td><code>src/components/ui/About.tsx</code></td>
+                            <td>Line 24</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bio/About Text</strong></td>
+                            <td><code>src/components/ui/About.tsx</code></td>
+                            <td>Line 35</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Skills</strong></td>
+                            <td><code>src/components/ui/Skills.tsx</code></td>
+                            <td>Line 6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Education</strong></td>
+                            <td><code>src/components/ui/Education.tsx</code></td>
+                            <td>Line 24</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Awards</strong></td>
+                            <td><code>src/components/ui/Awards.tsx</code></td>
+                            <td>Line 22</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Contact Info</strong></td>
+                            <td><code>src/components/ui/Contact.tsx</code></td>
+                            <td>Line 37</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Projects (3D Cards)</strong></td>
+                            <td><code>src/data/projects.ts</code></td>
+                            <td>Line 5</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Resume PDF</strong></td>
+                            <td><code>public/resume.pdf</code></td>
+                            <td>Add file here</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Example: Changing Skills</h3>
+                <p>Open: <code>src/components/ui/Skills.tsx</code></p>
+                <pre><code>const skillsData = {
+  primary: {
+    title: 'Primary Expertise',
+    skills: ['C# .NET 8', '.NET Framework', 'Add your skills here'],
+  },
+  languages: {
+    title: 'Languages',
+    skills: ['C#', 'Java', 'Python'], // Add/remove languages
+  },
+  // ... edit as needed
+};</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Pro Tip:</strong> After any change, save the file and run:
+                    <pre style="margin-top: 10px;"><code>git add .
+git commit -m "Update content"
+git push</code></pre>
+                    Vercel will automatically deploy your changes in ~2 minutes!
+                </div>
+            </div>
+
+            <!-- Vercel Security Section -->
+            <div class="section">
+                <h2><span class="icon">🔒</span> Is Vercel Secure? Will It Cost Money?</h2>
+
+                <div class="success-box">
+                    <h3 style="margin-top: 0;">✅ YES! Vercel is 100% SAFE and FREE!</h3>
+                    <p><strong>Vercel is trusted by major companies:</strong> Netflix, Nike, Uber, TikTok, Hulu, and thousands of professional developers worldwide.</p>
+                </div>
+
+                <h3>🛡️ Security Guarantees:</h3>
+
+                <div class="security-check">
+                    <span class="check-icon">✓</span>
+                    <div>
+                        <strong>Automatic HTTPS encryption</strong> - Your site is secure with SSL certificate
+                    </div>
+                </div>
+
+                <div class="security-check">
+                    <span class="check-icon">✓</span>
+                    <div>
+                        <strong>DDoS Protection</strong> - Protected from cyber attacks
+                    </div>
+                </div>
+
+                <div class="security-check">
+                    <span class="check-icon">✓</span>
+                    <div>
+                        <strong>Read-only GitHub access</strong> - Can only read your code, cannot modify anything
+                    </div>
+                </div>
+
+                <div class="security-check">
+                    <span class="check-icon">✓</span>
+                    <div>
+                        <strong>No credit card required</strong> - Free tier is truly free
+                    </div>
+                </div>
+
+                <div class="security-check">
+                    <span class="check-icon">✓</span>
+                    <div>
+                        <strong>No personal data collection</strong> - Only basic analytics (page views)
+                    </div>
+                </div>
+
+                <h3>🚫 What Vercel CANNOT Access:</h3>
+
+                <div class="security-check">
+                    <span class="cross-icon">✗</span>
+                    <div>Your personal computer files</div>
+                </div>
+
+                <div class="security-check">
+                    <span class="cross-icon">✗</span>
+                    <div>Your email or passwords</div>
+                </div>
+
+                <div class="security-check">
+                    <span class="cross-icon">✗</span>
+                    <div>Your bank account or payment information</div>
+                </div>
+
+                <div class="security-check">
+                    <span class="cross-icon">✗</span>
+                    <div>Other GitHub repositories</div>
+                </div>
+
+                <div class="security-check">
+                    <span class="cross-icon">✗</span>
+                    <div>Any personal information beyond your public GitHub repo</div>
+                </div>
+
+                <h3>💰 Pricing - Is It Really Free?</h3>
+
+                <div class="success-box">
+                    <h4 style="margin-top: 0;">FREE Forever (What You're Using):</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Cost:</strong> $0 (zero dollars)</li>
+                        <li><strong>No credit card required</strong></li>
+                        <li><strong>No trial period</strong> - Free forever</li>
+                        <li><strong>No hidden fees</strong></li>
+                        <li><strong>100GB bandwidth per month</strong> (~20,000 visitors)</li>
+                        <li><strong>Unlimited deployments</strong></li>
+                        <li><strong>Custom domain support</strong></li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h4 style="margin-top: 0;">⚠️ Will Vercel Ever Charge You?</h4>
+                    <p><strong>NO!</strong> Here's why:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>You didn't add a credit card</li>
+                        <li>They can't charge without your permission</li>
+                        <li>If you go over 100GB, site just stops (no charges)</li>
+                        <li>They'll email you first asking if you want to upgrade</li>
+                        <li>You can always say NO</li>
+                    </ul>
+                </div>
+
+                <h3>📊 Your Estimated Usage:</h3>
+                <table>
+                    <tr>
+                        <td><strong>Portfolio size:</strong></td>
+                        <td>~5-10MB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Expected visitors/month:</strong></td>
+                        <td>50-500 people</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandwidth used:</strong></td>
+                        <td>~1-5GB (1-5% of free limit)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost to you:</strong></td>
+                        <td><strong style="color: #28a745;">$0 (FREE)</strong></td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>Real-world example:</strong> To hit the 100GB limit, you'd need 10,000-20,000 visitors per month. That's like being famous! Most personal portfolios get 50-500 visits per month. You're completely safe! 🎉
+                </div>
+            </div>
+
+            <!-- Deployment Section -->
+            <div class="section">
+                <h2><span class="icon">🚀</span> How to Deploy Changes</h2>
+
+                <p>Every time you make changes, follow these steps:</p>
+
+                <ol class="steps">
+                    <li>
+                        <strong>Save your files in VS Code</strong>
+                        <p>Press <code>Ctrl + S</code> to save</p>
+                    </li>
+                    <li>
+                        <strong>Test locally (optional)</strong>
+                        <pre><code>npm run dev</code></pre>
+                        <p>Open: <code>http://localhost:5173</code> to preview changes</p>
+                    </li>
+                    <li>
+                        <strong>Commit changes</strong>
+                        <pre><code>git add .
+git commit -m "Describe what you changed"</code></pre>
+                    </li>
+                    <li>
+                        <strong>Push to GitHub</strong>
+                        <pre><code>git push</code></pre>
+                    </li>
+                    <li>
+                        <strong>Wait ~2 minutes</strong>
+                        <p>Vercel automatically detects the push and deploys!</p>
+                        <p>Check your live site: <a href="https://portfolio-gray-beta-31.vercel.app" target="_blank">https://portfolio-gray-beta-31.vercel.app</a></p>
+                    </li>
+                </ol>
+
+                <div class="success-box">
+                    <strong>✅ Automatic Deployments Configured!</strong>
+                    <p>Every push to GitHub automatically updates your live site. No manual work needed!</p>
+                </div>
+            </div>
+
+            <!-- Quick Checklist Section -->
+            <div class="section">
+                <h2><span class="icon">✅</span> Quick Customization Checklist</h2>
+
+                <ul class="checklist">
+                    <li>Add your profile photo (public/profile-photo.jpg)</li>
+                    <li>Add your resume PDF (public/resume.pdf)</li>
+                    <li>Update About.tsx with your photo img tag</li>
+                    <li>Update bio in About.tsx</li>
+                    <li>Update skills in Skills.tsx</li>
+                    <li>Update education in Education.tsx</li>
+                    <li>Update awards in Awards.tsx</li>
+                    <li>Update contact info in Contact.tsx</li>
+                    <li>Update projects in src/data/projects.ts</li>
+                    <li>Commit and push to GitHub</li>
+                    <li>Wait for Vercel to auto-deploy (~2 minutes)</li>
+                    <li>Test your live site!</li>
+                </ul>
+            </div>
+
+            <!-- Support Section -->
+            <div class="section">
+                <h2><span class="icon">🆘</span> Need Help?</h2>
+
+                <h3>Test Locally First:</h3>
+                <pre><code>npm run dev</code></pre>
+                <p>Open: <code>http://localhost:5173</code> to see changes before deploying</p>
+
+                <h3>Check for Errors:</h3>
+                <pre><code>npm run build</code></pre>
+                <p>If it fails, there's a syntax error in your code (missing comma, quote, etc.)</p>
+
+                <h3>Common Issues:</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Photo not showing?</strong> Check file path is <code>/profile-photo.jpg</code></li>
+                    <li><strong>Changes not live?</strong> Wait 2-3 minutes after pushing to GitHub</li>
+                    <li><strong>Build failed?</strong> Check for TypeScript errors (missing commas, quotes)</li>
+                </ul>
+
+                <h3>Resources:</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>GitHub Repository:</strong> <a href="https://github.com/omkarjore/portfolio" target="_blank">https://github.com/omkarjore/portfolio</a></li>
+                    <li><strong>Live Portfolio:</strong> <a href="https://portfolio-gray-beta-31.vercel.app" target="_blank">https://portfolio-gray-beta-31.vercel.app</a></li>
+                    <li><strong>Vercel Dashboard:</strong> <a href="https://vercel.com/dashboard" target="_blank">https://vercel.com/dashboard</a></li>
+                </ul>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 20px; background: #f8f9ff; border-radius: 8px; margin-top: 40px;">
+                <p style="font-size: 1.2em; color: #667eea; font-weight: bold;">🎉 Your portfolio is ready to shine!</p>
+                <p style="margin-top: 10px;">Remember: You can make unlimited changes - your code is safe, and Vercel is free forever! 🚀</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
