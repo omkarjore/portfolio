@@ -7,6 +7,7 @@ import { Navigation } from './components/layout/Navigation';
 import { About } from './components/ui/About';
 import { Skills } from './components/ui/Skills';
 import { Education } from './components/ui/Education';
+import { Awards } from './components/ui/Awards';
 import { useAppContext } from './context/AppContext';
 
 export const App: React.FC = () => {
@@ -60,6 +61,10 @@ export const App: React.FC = () => {
           ) : currentView === 'education' ? (
             <div className="w-full h-full overflow-y-auto">
               <Education />
+            </div>
+          ) : currentView === 'awards' ? (
+            <div className="w-full h-full overflow-y-auto">
+              <Awards />
             </div>
           ) : null}
           <Navigation />
