@@ -7,6 +7,7 @@ export interface ProjectData {
   techStack: string[];
   metrics?: string;
   githubUrl?: string;
+  isHero?: boolean;
 }
 
 export const projects: ProjectData[] = [
@@ -17,8 +18,9 @@ export const projects: ProjectData[] = [
     position: [-3, 0, 0],
     fullDescription: 'Automated P&ID (Piping and Instrumentation Diagram) generation system for major industrial clients. Reduced manual drafting time by 40% and automated over 50 technical drawings for THERMAX, L&T, and PRAJ projects.',
     techStack: ['C# .NET 8', 'Autodesk API', 'AI Integration', 'AutoCAD'],
-    metrics: '40% time reduction, 50+ drawings automated',
+    metrics: '40% reduction in drafting time • 50+ technical drawings automated',
     githubUrl: 'https://github.com/omkarjore/SmartPIDAutomation',
+    isHero: true,
   },
   {
     id: 'navisworks',

@@ -21,6 +21,7 @@ export const Scene: React.FC = () => {
           position={project.position}
           title={project.title}
           description={project.description}
+          isHero={project.isHero}
         />
       ))}
     </Canvas>
