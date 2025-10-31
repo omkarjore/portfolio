@@ -25,13 +25,11 @@ export const Navigation: React.FC = () => {
   }, [menuOpen, toggleMenu]);
 
   const handleMenuItemClick = (value: typeof menuItems[number]['value']) => {
-    console.log(`Navigate to: ${value}`);
     setCurrentView(value);
     toggleMenu();
   };
 
   const handleReturn3D = () => {
-    console.log('Return to 3D Experience');
     setCurrentView('home');
     toggleMenu();
   };
