@@ -14,10 +14,19 @@ import { Contact } from './components/ui/Contact';
 import { useAppContext } from './context/AppContext';
 
 export const App: React.FC = () => {
-  const { currentView, setCurrentView, toggleMenu } = useAppContext();
+  const { currentView, setCurrentView, toggleMenu, shouldReturnToWelcome } = useAppContext();
   const [showWelcome, setShowWelcome] = useState(true);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // Listen for return to welcome signal
+  React.useEffect(() => {
+    if (shouldReturnToWelcome) {
+      setShowWelcome(true);
+      setLoading(false);
+      setProgress(0);
+    }
+  }, [shouldReturnToWelcome]);
 
   // Handle 3D Experience selection
   const handleSelect3D = () => {

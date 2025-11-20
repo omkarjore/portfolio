@@ -2,20 +2,20 @@ import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 
 export const Education: React.FC = () => {
-  const { setCurrentView } = useAppContext();
+  const { returnToWelcome } = useAppContext();
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Return to 3D Button */}
         <button
-          onClick={() => setCurrentView('home')}
+          onClick={returnToWelcome}
           className="mb-8 flex items-center text-cyan-600 hover:text-cyan-700 transition-colors font-semibold"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Return to 3D Experience
+          Return to Welcome
         </button>
 
         <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">

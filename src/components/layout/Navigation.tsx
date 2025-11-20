@@ -11,7 +11,7 @@ const menuItems = [
 ];
 
 export const Navigation: React.FC = () => {
-  const { menuOpen, toggleMenu, setCurrentView } = useAppContext();
+  const { menuOpen, toggleMenu, setCurrentView, returnToWelcome } = useAppContext();
 
   // Close menu on Escape key
   useEffect(() => {
@@ -26,11 +26,6 @@ export const Navigation: React.FC = () => {
 
   const handleMenuItemClick = (value: typeof menuItems[number]['value']) => {
     setCurrentView(value);
-    toggleMenu();
-  };
-
-  const handleReturn3D = () => {
-    setCurrentView('home');
     toggleMenu();
   };
 
@@ -73,10 +68,10 @@ export const Navigation: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col h-full p-8">
-                {/* Close button */}
+                {/* Close button - higher z-index to stay visible */}
                 <button
                   onClick={toggleMenu}
-                  className="absolute top-6 right-6 p-2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 text-gray-400 hover:text-white transition-colors z-[60] bg-gray-800/80 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Close menu"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,12 +79,12 @@ export const Navigation: React.FC = () => {
                   </svg>
                 </button>
 
-                {/* Return to 3D link */}
+                {/* Return to Welcome link */}
                 <button
-                  onClick={handleReturn3D}
-                  className="text-left text-cyan-400 hover:text-cyan-300 font-semibold mb-8 transition-colors"
+                  onClick={returnToWelcome}
+                  className="text-left text-cyan-400 hover:text-cyan-300 font-semibold mb-8 transition-colors mt-2"
                 >
-                  ← Return to 3D Experience
+                  ← Return to Welcome
                 </button>
 
                 {/* Menu links */}
