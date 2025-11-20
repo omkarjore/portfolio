@@ -29,26 +29,28 @@ export const ProjectModal: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-safe"
+          className="fixed inset-0 z-50 bg-black/50 overflow-y-auto"
           onClick={closeProject}
           style={{
             paddingTop: 'max(env(safe-area-inset-top), 1rem)',
             paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
             paddingLeft: 'max(env(safe-area-inset-left), 0.5rem)',
             paddingRight: 'max(env(safe-area-inset-right), 0.5rem)',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
           }}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full relative overflow-y-auto"
-            style={{
-              maxHeight: 'calc(100vh - 2rem)',
-              WebkitOverflowScrolling: 'touch',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="min-h-full flex items-center justify-center py-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full relative my-4"
+              style={{
+                touchAction: 'pan-y',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Close button - bigger and more visible */}
             <button
               onClick={closeProject}
@@ -172,6 +174,7 @@ export const ProjectModal: React.FC = () => {
               </button>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

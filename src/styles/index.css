@@ -48,4 +48,22 @@
       min-height: 44px;
     }
   }
+
+  /* Modal scrolling fixes for iOS */
+  .fixed.overflow-y-auto {
+    /* Enable momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Contain scroll within modal */
+    overscroll-behavior: contain;
+  }
+
+  /* Ensure modal content is scrollable */
+  @supports (-webkit-touch-callout: none) {
+    .fixed.overflow-y-auto {
+      /* Fix iOS Safari scrolling issue */
+      position: fixed;
+      overflow-y: scroll !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }
