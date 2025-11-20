@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useProjectContext } from '../../context/ProjectContext';
+import { PIDCardEffects } from './PIDCardEffects';
 
 interface ProjectCardProps {
   id: string;
@@ -145,6 +146,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           {title}
         </Text>
       </mesh>
+
+      {/* P&ID-themed visual effects */}
+      <PIDCardEffects
+        position={position}
+        cardSize={cardSize}
+        isHero={isHero}
+        hovered={hovered}
+        clicked={clicked}
+      />
 
       {/* Glow effect on hover */}
       {hovered && (
