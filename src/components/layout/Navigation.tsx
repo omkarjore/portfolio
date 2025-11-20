@@ -24,8 +24,8 @@ export const Navigation: React.FC = () => {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [menuOpen, toggleMenu]);
 
-  const handleMenuItemClick = (value: typeof menuItems[number]['value']) => {
-    setCurrentView(value);
+  const handleMenuItemClick = (value: typeof menuItems[number]['value'] | 'admin') => {
+    setCurrentView(value as any);
     toggleMenu();
   };
 

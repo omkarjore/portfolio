@@ -213,8 +213,6 @@ const EducationForm: React.FC<{
   onCancel: () => void;
 }> = ({ education: initialEducation, onSave, onCancel }) => {
   const [education, setEducation] = useState(initialEducation);
-  const [certInput, setCertInput] = useState('');
-  const [awardInput, setAwardInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
