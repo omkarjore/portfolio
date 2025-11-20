@@ -39,7 +39,7 @@ export const Navigation: React.FC = () => {
       {/* Hamburger Button */}
       <button
         onClick={toggleMenu}
-        className="fixed top-6 right-6 z-50 p-3 bg-gray-900/80 backdrop-blur-sm rounded-lg hover:bg-gray-800 transition-colors"
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 p-3 sm:p-3 bg-gray-900/80 backdrop-blur-sm rounded-lg hover:bg-gray-800 transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
         <div className="w-6 h-5 flex flex-col justify-between">
@@ -69,7 +69,7 @@ export const Navigation: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-80 z-50 bg-gray-900 shadow-2xl"
+              className="fixed top-0 right-0 h-full w-full sm:w-80 max-w-sm z-50 bg-gray-900 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col h-full p-8">

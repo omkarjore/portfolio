@@ -34,7 +34,7 @@ export const ProjectModal: React.FC = () => {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-lg shadow-2xl p-8 max-w-2xl w-full mx-4 relative"
+            className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full mx-2 sm:mx-4 relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button - bigger and more visible */}
@@ -49,12 +49,12 @@ export const ProjectModal: React.FC = () => {
             </button>
 
             {/* Project title */}
-            <h2 className={`font-bold mb-4 text-gray-900 pr-8 ${isHero ? 'text-4xl' : 'text-3xl'}`}>
+            <h2 className={`font-bold mb-4 text-gray-900 pr-8 ${isHero ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'}`}>
               {project.title}
             </h2>
 
             {/* Description */}
-            <p className={`text-gray-700 mb-6 leading-relaxed ${isHero ? 'text-lg' : ''}`}>
+            <p className={`text-gray-700 mb-6 leading-relaxed text-sm sm:text-base ${isHero ? 'md:text-lg' : ''}`}>
               {project.fullDescription}
             </p>
 

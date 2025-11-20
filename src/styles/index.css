@@ -8,4 +8,29 @@
   html, body, #root {
     @apply h-full w-full overflow-hidden;
   }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    html, body {
+      /* Prevent overscroll bounce on iOS */
+      overscroll-behavior: none;
+      /* Prevent accidental zoom on double-tap */
+      touch-action: pan-x pan-y;
+      /* Smooth scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent text selection during touch navigation */
+    canvas {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Improve tap target sizes for accessibility */
+    button, a {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
 }

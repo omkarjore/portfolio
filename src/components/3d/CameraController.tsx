@@ -1,18 +1,24 @@
 import React, { useRef, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 
-const MIN_Z = 2;
-const MAX_Z = 8;
-const MIN_X = -4;
-const MAX_X = 4;
-const SCROLL_SENSITIVITY = 0.01;
-const TOUCH_SENSITIVITY = 0.02;
-const ARROW_SPEED = 0.1;
-const LERP_FACTOR = 0.1;
+interface CameraControllerProps {
+  isMobile?: boolean;
+}
 
-export const CameraController: React.FC = () => {
+export const CameraController: React.FC<CameraControllerProps> = ({ isMobile = false }) => {
   const { camera } = useThree();
-  const targetZ = useRef(5); // Initial camera Z position (forward/backward)
+
+  // Mobile-adaptive settings
+  const MIN_Z = isMobile ? 5 : 2;
+  const MAX_Z = isMobile ? 12 : 8;
+  const MIN_X = isMobile ? -6 : -4;
+  const MAX_X = isMobile ? 6 : 4;
+  const SCROLL_SENSITIVITY = 0.01;
+  const TOUCH_SENSITIVITY = isMobile ? 0.015 : 0.02; // Slightly reduced for smoother mobile control
+  const ARROW_SPEED = 0.1;
+  const LERP_FACTOR = isMobile ? 0.08 : 0.1; // Smoother interpolation on mobile
+
+  const targetZ = useRef(isMobile ? 8 : 5); // Initial camera Z position (forward/backward)
   const targetX = useRef(0); // Initial camera X position (left/right)
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -53,11 +59,16 @@ export const CameraController: React.FC = () => {
 
     // Mobile: Touch events for swipe up/down/left/right
     const handleTouchStart = (event: TouchEvent) => {
-      touchStartY.current = event.touches[0].clientY;
-      touchStartX.current = event.touches[0].clientX;
+      // Only handle single touch on the canvas
+      if (event.touches.length === 1) {
+        touchStartY.current = event.touches[0].clientY;
+        touchStartX.current = event.touches[0].clientX;
+      }
     };
 
     const handleTouchMove = (event: TouchEvent) => {
+      // Only handle single touch
+      if (event.touches.length !== 1) return;
       if (touchStartY.current === null || touchStartX.current === null) return;
 
       const touchCurrentY = event.touches[0].clientY;
@@ -65,20 +76,25 @@ export const CameraController: React.FC = () => {
       const deltaY = touchStartY.current - touchCurrentY;
       const deltaX = touchStartX.current - touchCurrentX;
 
-      // Update target Z based on vertical touch movement (up/down)
-      targetZ.current += deltaY * TOUCH_SENSITIVITY;
-      targetZ.current = Math.max(MIN_Z, Math.min(MAX_Z, targetZ.current));
+      // Only prevent default if we're actually moving in the 3D space
+      const isSignificantMove = Math.abs(deltaY) > 5 || Math.abs(deltaX) > 5;
 
-      // Update target X based on horizontal touch movement (left/right)
-      targetX.current += deltaX * TOUCH_SENSITIVITY;
-      targetX.current = Math.max(MIN_X, Math.min(MAX_X, targetX.current));
+      if (isSignificantMove) {
+        // Update target Z based on vertical touch movement (up/down)
+        targetZ.current += deltaY * TOUCH_SENSITIVITY;
+        targetZ.current = Math.max(MIN_Z, Math.min(MAX_Z, targetZ.current));
 
-      // Update start position for continuous movement
-      touchStartY.current = touchCurrentY;
-      touchStartX.current = touchCurrentX;
+        // Update target X based on horizontal touch movement (left/right)
+        targetX.current += deltaX * TOUCH_SENSITIVITY;
+        targetX.current = Math.max(MIN_X, Math.min(MAX_X, targetX.current));
 
-      // Prevent default scroll behavior
-      event.preventDefault();
+        // Update start position for continuous movement
+        touchStartY.current = touchCurrentY;
+        touchStartX.current = touchCurrentX;
+
+        // Prevent default scroll behavior only when actively navigating
+        event.preventDefault();
+      }
     };
 
     const handleTouchEnd = () => {
