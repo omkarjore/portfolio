@@ -36,7 +36,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -44,7 +44,7 @@ export const AdminDashboard: React.FC = () => {
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
-            className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 text-white flex-shrink-0 shadow-2xl"
+            className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 text-white flex-shrink-0 shadow-2xl overflow-y-auto"
           >
             <div className="p-6">
               {/* Logo/Header */}
