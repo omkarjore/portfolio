@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { WelcomeModal } from './components/ui/WelcomeModal';
 import { LoadingScreen } from './components/ui/LoadingScreen';
 import { MobileHint } from './components/ui/MobileHint';
 import { Scene } from './components/3d/Scene';
@@ -13,11 +14,16 @@ import { Contact } from './components/ui/Contact';
 import { useAppContext } from './context/AppContext';
 
 export const App: React.FC = () => {
-  const { currentView } = useAppContext();
-  const [loading, setLoading] = useState(true);
+  const { currentView, setCurrentView, toggleMenu } = useAppContext();
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
+  // Handle 3D Experience selection
+  const handleSelect3D = () => {
+    setShowWelcome(false);
+    setLoading(true);
+
     const duration = 2000; // 2 seconds total
     const interval = 50; // Update every 50ms
     const steps = duration / interval;
@@ -32,20 +38,35 @@ export const App: React.FC = () => {
         clearInterval(timer);
         setTimeout(() => {
           setLoading(false);
-        }, 200); // Small delay for smooth transition
+        }, 200);
       }
     }, interval);
+  };
 
-    return () => clearInterval(timer);
-  }, []);
+  // Handle Main Menu selection
+  const handleSelectMenu = () => {
+    setShowWelcome(false);
+    setCurrentView('about'); // Start at About page
+    toggleMenu(); // Open the navigation menu
+  };
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
+      {/* Welcome Modal - Shows first */}
+      {showWelcome && (
+        <WelcomeModal
+          onSelect3D={handleSelect3D}
+          onSelectMenu={handleSelectMenu}
+        />
+      )}
+
+      {/* Loading Screen - Shows after 3D Experience selected */}
       <AnimatePresence>
         {loading && <LoadingScreen progress={progress} />}
       </AnimatePresence>
 
-      {!loading && (
+      {/* Main Content - Shows after loading or menu selection */}
+      {!showWelcome && !loading && (
         <>
           <MobileHint />
           {currentView === 'home' ? (
