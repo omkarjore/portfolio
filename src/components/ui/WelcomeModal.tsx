@@ -191,14 +191,20 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
             </motion.div>
 
             {/* Choice Prompt */}
-            <motion.p
+            <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-center text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8"
+              className="text-center mb-6 sm:mb-8 px-4"
             >
-              Choose your experience:
-            </motion.p>
+              <p className="text-lg sm:text-xl text-gray-300 mb-3">
+                What would you like to explore?
+              </p>
+              <div className="text-sm sm:text-base text-gray-400 space-y-2">
+                <p>💡 Want to see my <span className="text-cyan-400 font-semibold">projects</span>? Click 3D Experience</p>
+                <p>👤 Want to know <span className="text-cyan-400 font-semibold">about me</span>? Click Main Menu</p>
+              </div>
+            </motion.div>
 
             {/* Action Buttons */}
             <motion.div
@@ -220,7 +226,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <span className="text-base sm:text-lg">3D Experience</span>
-                  <span className="text-xs font-normal opacity-80">Interactive Project Showcase</span>
+                  <span className="text-xs font-normal opacity-80">Explore My Projects</span>
                 </div>
               </motion.button>
 
@@ -234,10 +240,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
                 <div className="relative flex flex-col items-center gap-2 sm:gap-3">
                   <svg className="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <span className="text-base sm:text-lg">Main Menu</span>
-                  <span className="text-xs font-normal opacity-80">Traditional Navigation</span>
+                  <span className="text-xs font-normal opacity-80">Learn About Me</span>
                 </div>
               </motion.button>
             </motion.div>
