@@ -43,13 +43,13 @@ export const About: React.FC = () => {
               {/* Professional Bio */}
               <div className="space-y-4">
                 <p className="text-gray-700 leading-relaxed">
-                  I'm a C# .NET Developer at Inventive Business Solutions with 5-6 years of experience
+                  I'm a C# .NET Developer at Inventive Business Solutions with 2 years of experience
                   specializing in CAD automation and Autodesk API integration. My expertise lies in
                   developing custom solutions that streamline engineering workflows and significantly
                   reduce manual drafting time.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  Throughout my career, I've delivered high-impact automation projects for major
+                  In my time at Inventive Business Solutions, I've delivered high-impact automation projects for major
                   industrial clients including THERMAX, L&T, and PRAJ. My flagship project, the
                   SmartPID automation system, reduced drafting time by 40% and automated over 50
                   technical drawings, demonstrating the transformative power of intelligent automation
