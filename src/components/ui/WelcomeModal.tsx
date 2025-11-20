@@ -38,7 +38,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-y-auto safe-area-padding"
+          style={{
+            minHeight: '100vh',
+          }}
         >
           {/* Animated Grid Background */}
           <div className="absolute inset-0 opacity-20">
@@ -58,11 +61,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
-            className="relative z-10 max-w-2xl w-full mx-4"
+            className="relative z-10 max-w-2xl w-full mx-4 my-auto py-8"
           >
             {/* Valve Animation Container */}
-            <div className="flex justify-center mb-8">
-              <div className="relative">
+            <div className="flex justify-center mb-6 sm:mb-8">
+              <div className="relative scale-75 sm:scale-100">
                 {/* Instrumentation Circle - Pulsing */}
                 <motion.div
                   animate={{
@@ -174,15 +177,15 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-center mb-8"
+              className="text-center mb-6 sm:mb-8"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3">
                 Welcome to
               </h1>
-              <h2 className="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400 mb-3 sm:mb-4">
                 Omkar Jore Portfolio
               </h2>
-              <p className="text-gray-300 text-lg">
+              <p className="text-gray-300 text-sm sm:text-base md:text-lg px-4">
                 CAD Automation • P&ID Systems • Autodesk API Integration
               </p>
             </motion.div>
@@ -192,7 +195,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-center text-xl text-gray-300 mb-8"
+              className="text-center text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8"
             >
               Choose your experience:
             </motion.p>
@@ -209,14 +212,14 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
                 onClick={handleSelect3D}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative overflow-hidden bg-gradient-to-r from-cyan-600 to-cyan-500 text-white px-8 py-6 rounded-xl font-bold text-lg shadow-2xl transition-all"
+                className="group relative overflow-hidden bg-gradient-to-r from-cyan-600 to-cyan-500 text-white px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-bold text-base sm:text-lg shadow-2xl transition-all min-h-[140px] sm:min-h-auto"
               >
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
-                <div className="relative flex flex-col items-center gap-3">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="relative flex flex-col items-center gap-2 sm:gap-3">
+                  <svg className="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <span>3D Experience</span>
+                  <span className="text-base sm:text-lg">3D Experience</span>
                   <span className="text-xs font-normal opacity-80">Interactive Project Showcase</span>
                 </div>
               </motion.button>
@@ -226,14 +229,14 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onSelect3D, onSelect
                 onClick={handleSelectMenu}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative overflow-hidden bg-gradient-to-r from-gray-700 to-gray-600 text-white px-8 py-6 rounded-xl font-bold text-lg shadow-2xl transition-all border-2 border-gray-500"
+                className="group relative overflow-hidden bg-gradient-to-r from-gray-700 to-gray-600 text-white px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-bold text-base sm:text-lg shadow-2xl transition-all border-2 border-gray-500 min-h-[140px] sm:min-h-auto"
               >
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-                <div className="relative flex flex-col items-center gap-3">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="relative flex flex-col items-center gap-2 sm:gap-3">
+                  <svg className="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>Main Menu</span>
+                  <span className="text-base sm:text-lg">Main Menu</span>
                   <span className="text-xs font-normal opacity-80">Traditional Navigation</span>
                 </div>
               </motion.button>
