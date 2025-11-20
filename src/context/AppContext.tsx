@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 interface AppState {
   menuOpen: boolean;
-  currentView: 'home' | 'about' | 'skills' | 'education' | 'awards' | 'contact';
+  currentView: 'home' | 'about' | 'skills' | 'education' | 'awards' | 'contact' | 'admin';
   shouldReturnToWelcome: boolean;
 }
 

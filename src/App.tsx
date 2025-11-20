@@ -11,6 +11,7 @@ import { Skills } from './components/ui/Skills';
 import { Education } from './components/ui/Education';
 import { Awards } from './components/ui/Awards';
 import { Contact } from './components/ui/Contact';
+import { Admin } from './components/admin/Admin';
 import { useAppContext } from './context/AppContext';
 
 export const App: React.FC = () => {
@@ -77,34 +78,40 @@ export const App: React.FC = () => {
       {/* Main Content - Shows after loading or menu selection */}
       {!showWelcome && !loading && (
         <>
-          <MobileHint />
-          {currentView === 'home' ? (
+          {currentView === 'admin' ? (
+            <Admin />
+          ) : (
             <>
-              <Scene />
-              <ProjectModal />
+              <MobileHint />
+              {currentView === 'home' ? (
+                <>
+                  <Scene />
+                  <ProjectModal />
+                </>
+              ) : currentView === 'about' ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <About />
+                </div>
+              ) : currentView === 'skills' ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <Skills />
+                </div>
+              ) : currentView === 'education' ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <Education />
+                </div>
+              ) : currentView === 'awards' ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <Awards />
+                </div>
+              ) : currentView === 'contact' ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <Contact />
+                </div>
+              ) : null}
+              <Navigation />
             </>
-          ) : currentView === 'about' ? (
-            <div className="w-full h-full overflow-y-auto">
-              <About />
-            </div>
-          ) : currentView === 'skills' ? (
-            <div className="w-full h-full overflow-y-auto">
-              <Skills />
-            </div>
-          ) : currentView === 'education' ? (
-            <div className="w-full h-full overflow-y-auto">
-              <Education />
-            </div>
-          ) : currentView === 'awards' ? (
-            <div className="w-full h-full overflow-y-auto">
-              <Awards />
-            </div>
-          ) : currentView === 'contact' ? (
-            <div className="w-full h-full overflow-y-auto">
-              <Contact />
-            </div>
-          ) : null}
-          <Navigation />
+          )}
         </>
       )}
     </div>
