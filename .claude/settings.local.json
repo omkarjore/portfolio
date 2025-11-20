@@ -15,7 +15,17 @@
       "Bash(gh auth status:*)",
       "Bash(for file in About.tsx Skills.tsx Education.tsx Awards.tsx Contact.tsx)",
       "Bash(do sed:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(node:*)",
+      "Bash(pkill:*)",
+      "Bash(git push:*)",
+      "Bash(where:*)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel login:*)",
+      "Bash(vercel:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

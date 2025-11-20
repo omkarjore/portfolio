@@ -1,10 +1,9 @@
-import connectDB from '../lib/mongodb.js';
-import Skill from '../models/Skill.js';
-import { protect, authorize } from '../lib/auth.js';
+import connectDB from '../../lib/mongodb.js';
+import Skill from '../../lib/models/Skill.js';
+import { protect, authorize } from '../../lib/auth.js';
 
 export default async function handler(req, res) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
