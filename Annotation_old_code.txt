@@ -1,0 +1,1413 @@
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace Annotations
+{
+    /// <summary>
+    /// Standard beam dimensions for European steel profiles
+    /// </summary>
+    public class BeamDimensions
+    {
+        public string ProfileName { get; set; }
+        public double Height { get; set; }  // h (mm)
+        public double Width { get; set; }   // b (mm)
+        public double WebThickness { get; set; }  // tw (mm)
+        public double FlangeThickness { get; set; }  // tf (mm)
+    }
+
+    /// <summary>
+    /// Standard pipe dimensions for steel pipes
+    /// </summary>
+    public class PipeDimensions
+    {
+        public double NominalSize { get; set; }  // Nominal size in inches
+        public double OuterDiameter { get; set; }  // OD in mm
+        public double WallThickness { get; set; }  // Wall thickness in mm (Schedule 40)
+        public string DisplayName { get; set; }  // e.g., "1", "2", "3"
+    }
+
+    public class AnnotationCommands
+    {
+        // Standard European beam dimensions database
+        private static Dictionary<string, BeamDimensions> StandardBeams = new Dictionary<string, BeamDimensions>()
+        {
+            // HEA Series (European wide flange - light)
+            { "HE100A", new BeamDimensions { ProfileName = "HE100A", Height = 96, Width = 100, WebThickness = 5, FlangeThickness = 8 } },
+            { "HE120A", new BeamDimensions { ProfileName = "HE120A", Height = 114, Width = 120, WebThickness = 5, FlangeThickness = 8 } },
+            { "HE140A", new BeamDimensions { ProfileName = "HE140A", Height = 133, Width = 140, WebThickness = 5.5, FlangeThickness = 8.5 } },
+            { "HE160A", new BeamDimensions { ProfileName = "HE160A", Height = 152, Width = 160, WebThickness = 6, FlangeThickness = 9 } },
+            { "HE180A", new BeamDimensions { ProfileName = "HE180A", Height = 171, Width = 180, WebThickness = 6, FlangeThickness = 9.5 } },
+            { "HE200A", new BeamDimensions { ProfileName = "HE200A", Height = 190, Width = 200, WebThickness = 6.5, FlangeThickness = 10 } },
+            { "HE220A", new BeamDimensions { ProfileName = "HE220A", Height = 210, Width = 220, WebThickness = 7, FlangeThickness = 11 } },
+            { "HE240A", new BeamDimensions { ProfileName = "HE240A", Height = 230, Width = 240, WebThickness = 7.5, FlangeThickness = 12 } },
+            { "HE260A", new BeamDimensions { ProfileName = "HE260A", Height = 250, Width = 260, WebThickness = 7.5, FlangeThickness = 12.5 } },
+            { "HE280A", new BeamDimensions { ProfileName = "HE280A", Height = 270, Width = 280, WebThickness = 8, FlangeThickness = 13 } },
+            { "HE300A", new BeamDimensions { ProfileName = "HE300A", Height = 290, Width = 300, WebThickness = 8.5, FlangeThickness = 14 } },
+
+            // HEB Series (European wide flange - medium)
+            { "HE100B", new BeamDimensions { ProfileName = "HE100B", Height = 100, Width = 100, WebThickness = 6, FlangeThickness = 10 } },
+            { "HE120B", new BeamDimensions { ProfileName = "HE120B", Height = 120, Width = 120, WebThickness = 6.5, FlangeThickness = 11 } },
+            { "HE140B", new BeamDimensions { ProfileName = "HE140B", Height = 140, Width = 140, WebThickness = 7, FlangeThickness = 12 } },
+            { "HE160B", new BeamDimensions { ProfileName = "HE160B", Height = 160, Width = 160, WebThickness = 8, FlangeThickness = 13 } },
+            { "HE180B", new BeamDimensions { ProfileName = "HE180B", Height = 180, Width = 180, WebThickness = 8.5, FlangeThickness = 14 } },
+            { "HE200B", new BeamDimensions { ProfileName = "HE200B", Height = 200, Width = 200, WebThickness = 9, FlangeThickness = 15 } },
+            { "HE220B", new BeamDimensions { ProfileName = "HE220B", Height = 220, Width = 220, WebThickness = 9.5, FlangeThickness = 16 } },
+            { "HE240B", new BeamDimensions { ProfileName = "HE240B", Height = 240, Width = 240, WebThickness = 10, FlangeThickness = 17 } },
+            { "HE260B", new BeamDimensions { ProfileName = "HE260B", Height = 260, Width = 260, WebThickness = 10, FlangeThickness = 17.5 } },
+            { "HE280B", new BeamDimensions { ProfileName = "HE280B", Height = 280, Width = 280, WebThickness = 10.5, FlangeThickness = 18 } },
+            { "HE300B", new BeamDimensions { ProfileName = "HE300B", Height = 300, Width = 300, WebThickness = 11, FlangeThickness = 19 } },
+
+            // IPE Series (European I-beams)
+            { "IPE80", new BeamDimensions { ProfileName = "IPE80", Height = 80, Width = 46, WebThickness = 3.8, FlangeThickness = 5.2 } },
+            { "IPE100", new BeamDimensions { ProfileName = "IPE100", Height = 100, Width = 55, WebThickness = 4.1, FlangeThickness = 5.7 } },
+            { "IPE120", new BeamDimensions { ProfileName = "IPE120", Height = 120, Width = 64, WebThickness = 4.4, FlangeThickness = 6.3 } },
+            { "IPE140", new BeamDimensions { ProfileName = "IPE140", Height = 140, Width = 73, WebThickness = 4.7, FlangeThickness = 6.9 } },
+            { "IPE160", new BeamDimensions { ProfileName = "IPE160", Height = 160, Width = 82, WebThickness = 5, FlangeThickness = 7.4 } },
+            { "IPE180", new BeamDimensions { ProfileName = "IPE180", Height = 180, Width = 91, WebThickness = 5.3, FlangeThickness = 8 } },
+            { "IPE200", new BeamDimensions { ProfileName = "IPE200", Height = 200, Width = 100, WebThickness = 5.6, FlangeThickness = 8.5 } },
+            { "IPE220", new BeamDimensions { ProfileName = "IPE220", Height = 220, Width = 110, WebThickness = 5.9, FlangeThickness = 9.2 } },
+            { "IPE240", new BeamDimensions { ProfileName = "IPE240", Height = 240, Width = 120, WebThickness = 6.2, FlangeThickness = 9.8 } },
+            { "IPE270", new BeamDimensions { ProfileName = "IPE270", Height = 270, Width = 135, WebThickness = 6.6, FlangeThickness = 10.2 } },
+            { "IPE300", new BeamDimensions { ProfileName = "IPE300", Height = 300, Width = 150, WebThickness = 7.1, FlangeThickness = 10.7 } },
+
+            // Variant naming (HEA140 is same as HE140A)
+            { "HEA140", new BeamDimensions { ProfileName = "HEA140", Height = 133, Width = 140, WebThickness = 5.5, FlangeThickness = 8.5 } },
+            { "HEA100", new BeamDimensions { ProfileName = "HEA100", Height = 96, Width = 100, WebThickness = 5, FlangeThickness = 8 } },
+            { "HEA120", new BeamDimensions { ProfileName = "HEA120", Height = 114, Width = 120, WebThickness = 5, FlangeThickness = 8 } },
+            { "HEA160", new BeamDimensions { ProfileName = "HEA160", Height = 152, Width = 160, WebThickness = 6, FlangeThickness = 9 } },
+            { "HEA180", new BeamDimensions { ProfileName = "HEA180", Height = 171, Width = 180, WebThickness = 6, FlangeThickness = 9.5 } },
+            { "HEA200", new BeamDimensions { ProfileName = "HEA200", Height = 190, Width = 200, WebThickness = 6.5, FlangeThickness = 10 } },
+            { "HEA220", new BeamDimensions { ProfileName = "HEA220", Height = 210, Width = 220, WebThickness = 7, FlangeThickness = 11 } },
+            { "HEA240", new BeamDimensions { ProfileName = "HEA240", Height = 230, Width = 240, WebThickness = 7.5, FlangeThickness = 12 } },
+            { "HEA260", new BeamDimensions { ProfileName = "HEA260", Height = 250, Width = 260, WebThickness = 7.5, FlangeThickness = 12.5 } },
+            { "HEA280", new BeamDimensions { ProfileName = "HEA280", Height = 270, Width = 280, WebThickness = 8, FlangeThickness = 13 } },
+            { "HEA300", new BeamDimensions { ProfileName = "HEA300", Height = 290, Width = 300, WebThickness = 8.5, FlangeThickness = 14 } },
+        };
+
+        // Standard pipe dimensions database (Schedule 40)
+        private static Dictionary<string, PipeDimensions> StandardPipes = new Dictionary<string, PipeDimensions>()
+        {
+            // Nominal Size -> Actual OD and Wall Thickness (mm)
+            { "0.5", new PipeDimensions { NominalSize = 0.5, OuterDiameter = 21.3, WallThickness = 2.77, DisplayName = "1/2\"" } },
+            { "0.75", new PipeDimensions { NominalSize = 0.75, OuterDiameter = 26.7, WallThickness = 2.87, DisplayName = "3/4\"" } },
+            { "1", new PipeDimensions { NominalSize = 1, OuterDiameter = 33.4, WallThickness = 3.38, DisplayName = "1\"" } },
+            { "1.25", new PipeDimensions { NominalSize = 1.25, OuterDiameter = 42.2, WallThickness = 3.56, DisplayName = "1-1/4\"" } },
+            { "1.5", new PipeDimensions { NominalSize = 1.5, OuterDiameter = 48.3, WallThickness = 3.68, DisplayName = "1-1/2\"" } },
+            { "2", new PipeDimensions { NominalSize = 2, OuterDiameter = 60.3, WallThickness = 3.91, DisplayName = "2\"" } },
+            { "2.5", new PipeDimensions { NominalSize = 2.5, OuterDiameter = 73.0, WallThickness = 5.16, DisplayName = "2-1/2\"" } },
+            { "3", new PipeDimensions { NominalSize = 3, OuterDiameter = 88.9, WallThickness = 5.49, DisplayName = "3\"" } },
+            { "4", new PipeDimensions { NominalSize = 4, OuterDiameter = 114.3, WallThickness = 6.02, DisplayName = "4\"" } },
+            { "5", new PipeDimensions { NominalSize = 5, OuterDiameter = 141.3, WallThickness = 6.55, DisplayName = "5\"" } },
+            { "6", new PipeDimensions { NominalSize = 6, OuterDiameter = 168.3, WallThickness = 7.11, DisplayName = "6\"" } },
+            { "8", new PipeDimensions { NominalSize = 8, OuterDiameter = 219.1, WallThickness = 8.18, DisplayName = "8\"" } },
+            { "10", new PipeDimensions { NominalSize = 10, OuterDiameter = 273.0, WallThickness = 9.27, DisplayName = "10\"" } },
+            { "12", new PipeDimensions { NominalSize = 12, OuterDiameter = 323.9, WallThickness = 10.31, DisplayName = "12\"" } },
+        };
+
+        [CommandMethod("ADDANNOTATION")]
+        public void AddAnnotation()
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+            Editor ed = doc.Editor;
+
+            try
+            {
+                using (Transaction tr = db.TransactionManager.StartTransaction())
+                {
+                    // Step 1: Ask user to select entities in an area (window selection)
+                    PromptSelectionOptions pso = new PromptSelectionOptions();
+                    pso.MessageForAdding = "\nSelect entities in the area to annotate (use window selection): ";
+                    pso.AllowDuplicates = false;
+
+                    PromptSelectionResult psr = ed.GetSelection(pso);
+
+                    if (psr.Status != PromptStatus.OK || psr.Value == null)
+                    {
+                        ed.WriteMessage("\nSelection cancelled.");
+                        return;
+                    }
+
+                    SelectionSet initialSelection = psr.Value;
+
+                    if (initialSelection.Count == 0)
+                    {
+                        ed.WriteMessage("\nNo entities selected.");
+                        return;
+                    }
+
+                    // STEP 1A: Analyze all layers in the selection
+                    ed.WriteMessage("\n========================================");
+                    ed.WriteMessage("\n   LAYER ANALYSIS - Selected Area");
+                    ed.WriteMessage("\n========================================");
+
+                    Dictionary<string, int> layerCounts = new Dictionary<string, int>();
+                    Dictionary<string, Dictionary<string, int>> layerEntityTypes = new Dictionary<string, Dictionary<string, int>>();
+
+                    foreach (SelectedObject so in initialSelection)
+                    {
+                        if (so == null) continue;
+                        Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                        if (ent == null) continue;
+
+                        string layer = ent.Layer;
+                        string entityType = ent.GetType().Name;
+
+                        // Count entities per layer
+                        if (layerCounts.ContainsKey(layer))
+                            layerCounts[layer]++;
+                        else
+                            layerCounts[layer] = 1;
+
+                        // Count entity types per layer
+                        if (!layerEntityTypes.ContainsKey(layer))
+                            layerEntityTypes[layer] = new Dictionary<string, int>();
+
+                        if (layerEntityTypes[layer].ContainsKey(entityType))
+                            layerEntityTypes[layer][entityType]++;
+                        else
+                            layerEntityTypes[layer][entityType] = 1;
+                    }
+
+                    ed.WriteMessage($"\n\nTotal entities selected: {initialSelection.Count}");
+                    ed.WriteMessage($"\nLayers found: {layerCounts.Count}");
+                    ed.WriteMessage("\n\n--- LAYERS IN SELECTION ---");
+
+                    foreach (var layerKvp in layerCounts.OrderByDescending(x => x.Value))
+                    {
+                        ed.WriteMessage($"\n\nLayer: '{layerKvp.Key}' ({layerKvp.Value} entities)");
+
+                        // Show entity types for this layer
+                        if (layerEntityTypes.ContainsKey(layerKvp.Key))
+                        {
+                            ed.WriteMessage($"\n  Entity types:");
+                            foreach (var typeKvp in layerEntityTypes[layerKvp.Key].OrderByDescending(x => x.Value))
+                            {
+                                ed.WriteMessage($"\n    - {typeKvp.Key}: {typeKvp.Value}");
+                            }
+                        }
+                    }
+
+                    ed.WriteMessage("\n\n========================================\n");
+
+                    // Identify valid layers for processing
+                    ed.WriteMessage("\n--- IDENTIFYING VALID LAYERS FOR PROCESSING ---");
+                    List<string> validLayers = new List<string>();
+
+                    foreach (var layerKvp in layerCounts)
+                    {
+                        string layer = layerKvp.Key;
+
+                        // Check if layer name contains beam profile or pipe size info
+                        string beamInfo = ExtractElementFromLayerName(layer);
+                        string pipeSize = ExtractPipeSizeFromLayerName(layer);
+
+                        if (!string.IsNullOrEmpty(beamInfo))
+                        {
+                            validLayers.Add(layer);
+                            ed.WriteMessage($"\n  ✓ '{layer}' → Beam: {beamInfo}");
+                        }
+                        else if (!string.IsNullOrEmpty(pipeSize))
+                        {
+                            validLayers.Add(layer);
+                            ed.WriteMessage($"\n  ✓ '{layer}' → Pipe: {pipeSize}\"");
+                        }
+                        else
+                        {
+                            ed.WriteMessage($"\n  ✗ '{layer}' → Skipped (no size info in layer name)");
+                        }
+                    }
+
+                    if (validLayers.Count == 0)
+                    {
+                        ed.WriteMessage("\n\n⚠ No valid layers found!");
+                        ed.WriteMessage("\nValid layer names must contain:");
+                        ed.WriteMessage("\n  - Beam profiles: HE140A, HEA140, IPE200, etc.");
+                        ed.WriteMessage("\n  - Pipe sizes: SA_PIPE-1-C3226, PIPE-2-XXX, etc.");
+                        return;
+                    }
+
+                    ed.WriteMessage($"\n\n✓ Found {validLayers.Count} valid layer(s) to process");
+                    ed.WriteMessage("\n========================================\n");
+
+                    // PHASE 1: Collect all beam entities by profile to create centered labels
+                    Dictionary<string, List<Entity>> beamsByProfile = new Dictionary<string, List<Entity>>();
+
+                    foreach (string layerName in validLayers)
+                    {
+                        string elementInfo = ExtractElementFromLayerName(layerName);
+                        if (string.IsNullOrEmpty(elementInfo)) continue; // Skip non-beam layers
+
+                        List<Entity> layerEntities = new List<Entity>();
+                        foreach (SelectedObject so in initialSelection)
+                        {
+                            if (so != null)
+                            {
+                                Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                                if (ent != null && ent.Layer == layerName &&
+                                    !(ent is Circle) && !(ent is DBText) && !(ent is MText))
+                                {
+                                    layerEntities.Add(ent);
+                                }
+                            }
+                        }
+
+                        if (layerEntities.Count > 0)
+                        {
+                            // Skip PL profiles in Phase 1 - they'll be handled in Phase 2
+                            if (!elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (!beamsByProfile.ContainsKey(elementInfo))
+                                    beamsByProfile[elementInfo] = new List<Entity>();
+                                beamsByProfile[elementInfo].AddRange(layerEntities);
+                            }
+                        }
+                    }
+
+                    // Create ONE centered label per beam profile (HE/IPE only, PL handled in Phase 2)
+                    BlockTable bt = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
+                    BlockTableRecord btr = tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+                    foreach (var profileGroup in beamsByProfile)
+                    {
+                        string profile = profileGroup.Key;
+                        List<Entity> allBeamEntities = profileGroup.Value;
+
+                        // Calculate combined bounds across all layers with this profile
+                        double minX = double.MaxValue, maxX = double.MinValue;
+                        double minY = double.MaxValue, maxY = double.MinValue;
+
+                        foreach (Entity ent in allBeamEntities)
+                        {
+                            try
+                            {
+                                Extents3d? bounds = ent.Bounds;
+                                if (bounds.HasValue)
+                                {
+                                    minX = Math.Min(minX, bounds.Value.MinPoint.X);
+                                    maxX = Math.Max(maxX, bounds.Value.MaxPoint.X);
+                                    minY = Math.Min(minY, bounds.Value.MinPoint.Y);
+                                    maxY = Math.Max(maxY, bounds.Value.MaxPoint.Y);
+                                }
+                            }
+                            catch { }
+                        }
+
+                        double centerX = (minX + maxX) / 2;
+                        double centerY = (minY + maxY) / 2;
+                        double textHeight = 12;
+
+                        // Standard centered label for HE/IPE profiles
+                        double textOffset = 30;   // Text closer to beam (30mm below)
+
+                        DBText elementText = new DBText();
+                        elementText.Position = new Point3d(centerX, minY - textOffset, 0);  // Text above dimension
+                        elementText.Height = 30;  // Font size 30mm
+                        elementText.TextString = profile;
+                        elementText.HorizontalMode = TextHorizontalMode.TextCenter;
+                        elementText.VerticalMode = TextVerticalMode.TextTop;
+                        elementText.AlignmentPoint = elementText.Position;
+                        elementText.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                            Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow
+
+                        btr.AppendEntity(elementText);
+                        tr.AddNewlyCreatedDBObject(elementText, true);
+
+                        ed.WriteMessage($"\n✓ Created centered label for {profile} at X={centerX:F0}");
+                    }
+
+                    // PHASE 2: Process each valid layer separately for dimensions and pipes
+                    int totalBeamsProcessed = 0;
+                    int totalPipesProcessed = 0;
+                    HashSet<string> labeledProfiles = new HashSet<string>(beamsByProfile.Keys); // Track already-labeled profiles
+
+                    foreach (string layerName in validLayers)
+                    {
+                        ed.WriteMessage($"\n\n╔════════════════════════════════════════╗");
+                        ed.WriteMessage($"\n║  PROCESSING LAYER: {layerName.PadRight(18)}║");
+                        ed.WriteMessage($"\n╚════════════════════════════════════════╝");
+
+                        // Extract element information from layer name
+                        string elementInfo = ExtractElementFromLayerName(layerName);
+                        string pipeSize = ExtractPipeSizeFromLayerName(layerName);
+
+                        // Step 2: Filter selected entities to only those on this layer
+                        List<ObjectId> selectedIds = new List<ObjectId>();
+                        foreach (SelectedObject so in initialSelection)
+                        {
+                            if (so != null)
+                            {
+                                Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                                if (ent != null && ent.Layer == layerName)
+                                {
+                                    selectedIds.Add(so.ObjectId);
+                                }
+                            }
+                        }
+
+                        if (selectedIds.Count == 0)
+                        {
+                            ed.WriteMessage($"\n⚠ No entities found on this layer (skipped)");
+                            continue;
+                        }
+
+                        ed.WriteMessage($"\nEntities on this layer: {selectedIds.Count}");
+
+                    // Step 3: Categorize entities by type
+                    List<Entity> allEntities = new List<Entity>();
+                    List<Line> lines = new List<Line>();
+                    List<Circle> circles = new List<Circle>();
+                    Dictionary<string, int> entityTypeCounts = new Dictionary<string, int>();
+
+                    foreach (ObjectId objId in selectedIds)
+                    {
+                        Entity ent = tr.GetObject(objId, OpenMode.ForRead) as Entity;
+                        if (ent == null) continue;
+
+                        // Track entity types for debugging
+                        string entityType = ent.GetType().Name;
+                        if (entityTypeCounts.ContainsKey(entityType))
+                            entityTypeCounts[entityType]++;
+                        else
+                            entityTypeCounts[entityType] = 1;
+
+                        // Skip text entities
+                        if (ent is DBText || ent is MText)
+                            continue;
+
+                        allEntities.Add(ent);
+
+                        // Categorize entity
+                        if (ent is Circle circle)
+                        {
+                            circles.Add(circle);
+                        }
+                        else if (ent is Line line)
+                        {
+                            lines.Add(line);
+                        }
+                        else if (ent is Polyline pline && pline.Closed)
+                        {
+                            // Check if it's a circular polyline (pipe)
+                            if (IsCircularPolyline(pline))
+                            {
+                                // Create equivalent circle for processing
+                                Point3d center = GetPolylineCenter(pline);
+                                double radius = GetPolylineRadius(pline, center);
+                                Circle equivalentCircle = new Circle(center, Vector3d.ZAxis, radius);
+                                circles.Add(equivalentCircle);
+                            }
+                        }
+                    }
+
+                    // Display entity type breakdown
+                    ed.WriteMessage("\n--- Entity Types Detected ---");
+                    foreach (var kvp in entityTypeCounts)
+                    {
+                        ed.WriteMessage($"\n  {kvp.Key}: {kvp.Value}");
+                    }
+
+                    // Step 3.5: Detect circular patterns from Line entities
+                    if (lines.Count > 0)
+                    {
+                        ed.WriteMessage("\n\n========================================");
+                        ed.WriteMessage($"\n   CIRCULAR PATTERN DETECTION");
+                        ed.WriteMessage("\n========================================");
+                        ed.WriteMessage($"\nAnalyzing {lines.Count} lines for circular patterns (pipes)...");
+                        List<Circle> detectedCircles = DetectCircularPatternsFromLines(lines, ed);
+                        circles.AddRange(detectedCircles);
+                        ed.WriteMessage($"\n\n✓ RESULT: Found {detectedCircles.Count} circular patterns (pipes)");
+                        ed.WriteMessage("\n========================================\n");
+                    }
+
+                    // Separate remaining entities as beam structures
+                    List<Entity> rectangularEntities = allEntities.Where(e =>
+                        !(e is Circle) &&
+                        !(e is DBText) &&
+                        !(e is MText)).ToList();
+
+                        // Step 4: Process rectangular entities (I-beam structure)
+                        if (rectangularEntities.Count > 0 && !string.IsNullOrEmpty(elementInfo))
+                        {
+                            // Skip label creation if already labeled in Phase 1
+                            bool skipLabel = labeledProfiles.Contains(elementInfo);
+                            ProcessBeamStructure(tr, db, ed, rectangularEntities, elementInfo, skipLabel);
+                            totalBeamsProcessed++;
+                        }
+
+                        // Step 5: Process circles (pipes)
+                        if (circles.Count > 0)
+                        {
+                            ProcessPipes(tr, db, ed, circles, layerName);
+                            totalPipesProcessed += circles.Count;
+                        }
+
+                        string layerInfo = !string.IsNullOrEmpty(elementInfo) ? elementInfo : (pipeSize + "\" pipe");
+                        ed.WriteMessage($"\n✓ Layer '{layerName}' completed");
+                        ed.WriteMessage($"\n  - Beams annotated: {(rectangularEntities.Count > 0 && !string.IsNullOrEmpty(elementInfo) ? 1 : 0)}");
+                        ed.WriteMessage($"\n  - Pipes annotated: {circles.Count}");
+                    }
+
+                    // Step 6: Add pipe height dimensions (vertical distance from beam base to pipe tops)
+                    List<string> beamLayers = validLayers.Where(layer => !string.IsNullOrEmpty(ExtractElementFromLayerName(layer))).ToList();
+                    List<string> pipeLayers = validLayers.Where(layer => !string.IsNullOrEmpty(ExtractPipeSizeFromLayerName(layer))).ToList();
+
+                    if (beamLayers.Count > 0 && pipeLayers.Count > 0)
+                    {
+                        ed.WriteMessage("\n\n========================================");
+                        ed.WriteMessage("\n   PIPE HEIGHT DIMENSIONS FROM BEAM BASE");
+                        ed.WriteMessage("\n========================================");
+                        AddPipeHeightDimensions(tr, db, ed, initialSelection, beamLayers, pipeLayers);
+                        ed.WriteMessage("\n========================================\n");
+                    }
+
+                    // Final summary
+                    ed.WriteMessage("\n\n========================================");
+                    ed.WriteMessage("\n         ANNOTATION SUMMARY");
+                    ed.WriteMessage("\n========================================");
+                    ed.WriteMessage($"\nTotal layers processed: {validLayers.Count}");
+                    ed.WriteMessage($"\nBeam layers annotated: {totalBeamsProcessed}");
+                    ed.WriteMessage($"\nPipe elements annotated: {totalPipesProcessed}");
+                    ed.WriteMessage("\n========================================\n");
+
+                    tr.Commit();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ed.WriteMessage($"\nError: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Add vertical pipe height dimensions from beam base to pipe tops
+        /// </summary>
+        private void AddPipeHeightDimensions(Transaction tr, Database db, Editor ed, SelectionSet allSelection, List<string> beamLayers, List<string> pipeLayers)
+        {
+            // Step 1: Find beam base (lowest Y coordinate of all beams)
+            double beamBase = double.MaxValue;
+
+            foreach (string layerName in beamLayers)
+            {
+                foreach (SelectedObject so in allSelection)
+                {
+                    if (so == null) continue;
+                    Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                    if (ent == null || ent.Layer != layerName) continue;
+
+                    try
+                    {
+                        Extents3d? bounds = ent.Bounds;
+                        if (bounds.HasValue)
+                        {
+                            beamBase = Math.Min(beamBase, bounds.Value.MinPoint.Y);
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            if (beamBase == double.MaxValue)
+            {
+                ed.WriteMessage("\n⚠ Could not find beam base");
+                return;
+            }
+
+            ed.WriteMessage($"\nBeam base level: Y={beamBase:F0}");
+
+            // Step 2: Find all pipes and their top positions (one per layer)
+            // First, calculate combined bounds for all entities on each pipe layer
+            Dictionary<string, (double minX, double maxX, double minY, double maxY)> layerBounds = new Dictionary<string, (double, double, double, double)>();
+
+            foreach (string layerName in pipeLayers)
+            {
+                double minX = double.MaxValue, maxX = double.MinValue;
+                double minY = double.MaxValue, maxY = double.MinValue;
+                bool foundEntities = false;
+
+                foreach (SelectedObject so in allSelection)
+                {
+                    if (so == null) continue;
+                    Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                    if (ent == null || ent.Layer != layerName) continue;
+
+                    try
+                    {
+                        Extents3d? bounds = ent.Bounds;
+                        if (bounds.HasValue)
+                        {
+                            minX = Math.Min(minX, bounds.Value.MinPoint.X);
+                            maxX = Math.Max(maxX, bounds.Value.MaxPoint.X);
+                            minY = Math.Min(minY, bounds.Value.MinPoint.Y);
+                            maxY = Math.Max(maxY, bounds.Value.MaxPoint.Y);
+                            foundEntities = true;
+                        }
+                    }
+                    catch { }
+                }
+
+                if (foundEntities)
+                {
+                    layerBounds[layerName] = (minX, maxX, minY, maxY);
+                }
+            }
+
+            if (layerBounds.Count == 0)
+            {
+                ed.WriteMessage("\n⚠ No pipes found");
+                return;
+            }
+
+            // Now create the list with one entry per layer (including pipe bottom and top)
+            List<(string layer, double xCenter, double yBottom, double yTop, double pipeLength)> pipePositions =
+                new List<(string, double, double, double, double)>();
+
+            foreach (var kvp in layerBounds)
+            {
+                double xCenter = (kvp.Value.minX + kvp.Value.maxX) / 2;
+                double yBottom = kvp.Value.minY;
+                double yTop = kvp.Value.maxY;
+                double pipeLength = yTop - yBottom;
+                pipePositions.Add((kvp.Key, xCenter, yBottom, yTop, pipeLength));
+            }
+
+            ed.WriteMessage($"\nFound {pipePositions.Count} pipe layer(s):");
+            foreach (var pipe in pipePositions)
+            {
+                ed.WriteMessage($"\n  {pipe.layer}:");
+                ed.WriteMessage($"\n    - Bottom: Y={pipe.yBottom:F0}, Top: Y={pipe.yTop:F0}");
+                ed.WriteMessage($"\n    - Pipe length: {pipe.pipeLength:F0}mm");
+            }
+
+            // Step 3: Create vertical dimensions from beam base to pipe tops
+            BlockTable bt = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
+            BlockTableRecord btr = tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+
+            // Find the rightmost X coordinate across ALL selected entities
+            double structureMaxX = double.MinValue;
+            foreach (SelectedObject so in allSelection)
+            {
+                if (so == null) continue;
+                Entity ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                if (ent == null) continue;
+
+                try
+                {
+                    Extents3d? bounds = ent.Bounds;
+                    if (bounds.HasValue)
+                    {
+                        structureMaxX = Math.Max(structureMaxX, bounds.Value.MaxPoint.X);
+                    }
+                }
+                catch { }
+            }
+
+            ed.WriteMessage($"\nRightmost X coordinate of entire structure: {structureMaxX:F0}");
+
+            // Calculate the overall center X position of all pipes to determine left/right
+            double centerX = pipePositions.Average(p => p.xCenter);
+            ed.WriteMessage($"\nCenter X position of all pipes: {centerX:F0}");
+
+            double dimOffsetX = -300; // Left side of drawing
+            int dimIndex = 0;
+
+            foreach (var pipe in pipePositions)
+            {
+                double pipeHeight = pipe.yTop - beamBase;
+
+                // Determine if this pipe is on the left or right side of the center
+                bool isLeftSide = pipe.xCenter < centerX;
+                double xPositionOrange;
+                double xPositionGreen;
+
+                if (isLeftSide)
+                {
+                    // Left side pipe: position dimensions on LEFT (outside diagram)
+                    // Green (pipe length) closer to pipe, Orange (total height) further away
+                    xPositionGreen = pipe.xCenter + dimOffsetX - (dimIndex * 60); // Green closer to pipe
+                    xPositionOrange = xPositionGreen - 100; // Orange 100mm to the left of green dimension
+                    ed.WriteMessage($"\n  Pipe on LEFT side - Green at X={xPositionGreen:F0}, Orange at X={xPositionOrange:F0}");
+                }
+                else
+                {
+                    // Right side pipe: position dimensions on RIGHT (use pipe's own position, same as left side logic)
+                    // Green (pipe length) closer to pipe, Orange (total height) further away
+                    xPositionGreen = pipe.xCenter + 300 + (dimIndex * 60); // Green 300mm to the right of pipe center
+                    xPositionOrange = xPositionGreen + 100; // Orange 100mm to the right of green dimension
+                    ed.WriteMessage($"\n  Pipe on RIGHT side - Green at X={xPositionGreen:F0}, Orange at X={xPositionOrange:F0}");
+                }
+
+                // 1. Create vertical dimension from beam base to pipe top (TOTAL HEIGHT - ORANGE)
+                // Points at pipe center for extension lines to connect
+                Point3d dimStart = new Point3d(pipe.xCenter, beamBase, 0);
+                Point3d dimEnd = new Point3d(pipe.xCenter, pipe.yTop, 0);
+                // Dimension line position (offset to left or right)
+                Point3d dimPos = new Point3d(xPositionOrange, (beamBase + pipe.yTop) / 2, 0);
+
+                RotatedDimension heightDim = new RotatedDimension(
+                    Math.PI / 2, dimStart, dimEnd, dimPos, "", ObjectId.Null);
+
+                // Red lines with yellow text
+                heightDim.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red (overall)
+                heightDim.Dimclrd = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red dimension line
+                heightDim.Dimclre = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red extension line
+                heightDim.Dimclrt = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow text
+
+                btr.AppendEntity(heightDim);
+                tr.AddNewlyCreatedDBObject(heightDim, true);
+
+                ed.WriteMessage($"\n  ✓ Added total height dimension: {pipeHeight:F0}mm for '{pipe.layer}'");
+
+                // 2. Create vertical dimension for PIPE LENGTH ONLY (from pipe bottom to pipe top - GREEN)
+                // Points at pipe center for extension lines to connect
+                Point3d pipeDimStart = new Point3d(pipe.xCenter, pipe.yBottom, 0);
+                Point3d pipeDimEnd = new Point3d(pipe.xCenter, pipe.yTop, 0);
+                // Dimension line position (offset to left or right)
+                Point3d pipeDimPos = new Point3d(xPositionGreen, (pipe.yBottom + pipe.yTop) / 2, 0);
+
+                RotatedDimension pipeLengthDim = new RotatedDimension(
+                    Math.PI / 2, pipeDimStart, pipeDimEnd, pipeDimPos, "", ObjectId.Null);
+
+                // Red lines with yellow text
+                pipeLengthDim.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red (overall)
+                pipeLengthDim.Dimclrd = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red dimension line
+                pipeLengthDim.Dimclre = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red extension line
+                pipeLengthDim.Dimclrt = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow text
+
+                btr.AppendEntity(pipeLengthDim);
+                tr.AddNewlyCreatedDBObject(pipeLengthDim, true);
+
+                ed.WriteMessage($"\n  ✓ Added pipe length dimension: {pipe.pipeLength:F0}mm for '{pipe.layer}'");
+
+                dimIndex++;
+            }
+        }
+
+        /// <summary>
+        /// Process I-beam structure using STANDARD dimensions
+        /// </summary>
+        private void ProcessBeamStructure(Transaction tr, Database db, Editor ed, List<Entity> entities, string elementInfo, bool skipLabel = false)
+        {
+            // Look up standard beam dimensions
+            BeamDimensions standardDims = null;
+
+            // Check if it's a PL (Plate) profile - parse dimensions from name
+            if (elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+            {
+                var plMatch = Regex.Match(elementInfo, @"PL(\d+)X(\d+)", RegexOptions.IgnoreCase);
+                if (plMatch.Success && plMatch.Groups.Count >= 3)
+                {
+                    double width = double.Parse(plMatch.Groups[1].Value);
+                    double thickness = double.Parse(plMatch.Groups[2].Value);
+                    standardDims = new BeamDimensions
+                    {
+                        ProfileName = elementInfo.ToUpper(),
+                        Width = width,
+                        Height = thickness,
+                        WebThickness = thickness,
+                        FlangeThickness = thickness
+                    };
+                    ed.WriteMessage($"\n✓ Parsed PL profile: {elementInfo} (Width={width}mm, Thickness={thickness}mm)");
+                }
+                else
+                {
+                    ed.WriteMessage($"\nWarning: Could not parse PL profile dimensions from {elementInfo}");
+                    return;
+                }
+            }
+            else if (!StandardBeams.TryGetValue(elementInfo, out standardDims))
+            {
+                ed.WriteMessage($"\nWarning: No standard dimensions found for {elementInfo}");
+                ed.WriteMessage("\nAvailable profiles: HE100A-HE300A, HE100B-HE300B, IPE80-IPE300, PL###X##");
+                return;
+            }
+
+            // Find bounding box of geometry to position annotations
+            List<Extents3d> allBounds = new List<Extents3d>();
+
+            foreach (Entity ent in entities)
+            {
+                try
+                {
+                    Extents3d? bounds = ent.Bounds;
+                    if (bounds.HasValue)
+                    {
+                        allBounds.Add(bounds.Value);
+                        // Debug: Print bounds for PL profiles
+                        if (elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ed.WriteMessage($"\n  Entity bounds: MinX={bounds.Value.MinPoint.X:F1}, MaxX={bounds.Value.MaxPoint.X:F1}, MinY={bounds.Value.MinPoint.Y:F1}, MaxY={bounds.Value.MaxPoint.Y:F1}");
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (allBounds.Count == 0)
+            {
+                ed.WriteMessage("\nNo valid beam entities found for positioning.");
+                return;
+            }
+
+            // Calculate geometry bounds for positioning only
+            Point3d geoMin = allBounds[0].MinPoint;
+            Point3d geoMax = allBounds[0].MaxPoint;
+
+            foreach (Extents3d ext in allBounds)
+            {
+                geoMin = new Point3d(
+                    Math.Min(geoMin.X, ext.MinPoint.X),
+                    Math.Min(geoMin.Y, ext.MinPoint.Y),
+                    Math.Min(geoMin.Z, ext.MinPoint.Z)
+                );
+                geoMax = new Point3d(
+                    Math.Max(geoMax.X, ext.MaxPoint.X),
+                    Math.Max(geoMax.Y, ext.MaxPoint.Y),
+                    Math.Max(geoMax.Z, ext.MaxPoint.Z)
+                );
+            }
+
+            Point3d geoCenter = new Point3d(
+                (geoMin.X + geoMax.X) / 2,
+                (geoMin.Y + geoMax.Y) / 2,
+                (geoMin.Z + geoMax.Z) / 2
+            );
+
+            // Measure ACTUAL geometry dimensions
+            double actualLength = geoMax.X - geoMin.X;
+            double actualHeight = geoMax.Y - geoMin.Y;
+
+            // Debug: Print final bounds for PL profiles
+            if (elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+            {
+                ed.WriteMessage($"\n  Final bounds: geoMin.X={geoMin.X:F1}, geoMax.X={geoMax.X:F1}, geoMin.Y={geoMin.Y:F1}, geoMax.Y={geoMax.Y:F1}");
+                ed.WriteMessage($"\n  PRIMARY STRUCTURE EDGES:");
+                ed.WriteMessage($"\n    - Left edge at X={geoMin.X:F1}");
+                ed.WriteMessage($"\n    - Right edge at X={geoMax.X:F1}");
+                ed.WriteMessage($"\n    - Bottom edge at Y={geoMin.Y:F1}");
+                ed.WriteMessage($"\n    - Top edge at Y={geoMax.Y:F1}");
+                ed.WriteMessage($"\n    - Center at X={geoCenter.X:F1}, Y={geoCenter.Y:F1}");
+                ed.WriteMessage($"\n    - Width={actualLength:F1}mm, Height={actualHeight:F1}mm");
+            }
+
+            // Create annotations
+            BlockTable bt = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
+            BlockTableRecord btr = tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+
+            // ADJUSTED SIZES to match reference image
+            double textHeight = 12;      // Reduced from 50 to 12
+            double textOffset = 30;      // Text closer to beam
+            double dimOffset = 120;      // Dimension further from beam (below text)
+
+            // Create element name text at BOTTOM CENTER (skip if already created in Phase 1)
+            if (!skipLabel)
+            {
+                // Check if it's a PL (Plate) profile - use MLeader with red line
+                if (elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Create simple leader with line and arrow for PL profiles
+                    // Arrow points to the CENTER TOP of the plate structure
+                    Point3d arrowPoint = new Point3d(geoCenter.X, geoMax.Y, 0);  // Center top
+                    Point3d textPoint = new Point3d(geoCenter.X - 200, geoMax.Y + 150, 0);  // Text upper-left
+
+                    // Debug: Print leader placement
+                    ed.WriteMessage($"\n  LEADER PLACEMENT:");
+                    ed.WriteMessage($"\n    - Arrow (leader head) at: X={arrowPoint.X:F1}, Y={arrowPoint.Y:F1}");
+                    ed.WriteMessage($"\n    - Text position at: X={textPoint.X:F1}, Y={textPoint.Y:F1}");
+                    ed.WriteMessage($"\n    - Arrow is at CENTER TOP of plate");
+
+                    // Create simple diagonal line (red)
+                    Line leaderLine = new Line(arrowPoint, textPoint);
+                    leaderLine.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                        Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red
+                    btr.AppendEntity(leaderLine);
+                    tr.AddNewlyCreatedDBObject(leaderLine, true);
+
+                    // Create arrow head at the arrow point (simple polyline arrow)
+                    double arrowSize = 20;
+                    Point3d arrow1 = new Point3d(arrowPoint.X - arrowSize, arrowPoint.Y + arrowSize, 0);
+                    Point3d arrow2 = new Point3d(arrowPoint.X + arrowSize, arrowPoint.Y + arrowSize, 0);
+
+                    Polyline arrow = new Polyline();
+                    arrow.AddVertexAt(0, new Point2d(arrow1.X, arrow1.Y), 0, 0, 0);
+                    arrow.AddVertexAt(1, new Point2d(arrowPoint.X, arrowPoint.Y), 0, 0, 0);
+                    arrow.AddVertexAt(2, new Point2d(arrow2.X, arrow2.Y), 0, 0, 0);
+                    arrow.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                        Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red
+                    btr.AppendEntity(arrow);
+                    tr.AddNewlyCreatedDBObject(arrow, true);
+
+                    // Create text (yellow)
+                    DBText labelText = new DBText();
+                    labelText.Position = textPoint;
+                    labelText.Height = 30;
+                    labelText.TextString = elementInfo;
+                    labelText.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                        Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow
+                    btr.AppendEntity(labelText);
+                    tr.AddNewlyCreatedDBObject(labelText, true);
+
+                    ed.WriteMessage($"\n✓ Created simple leader for {elementInfo} at center top X={geoCenter.X:F0}, Y={geoMax.Y:F0}");
+                }
+                else
+                {
+                    // Standard centered text label for HE/IPE profiles
+                    DBText elementText = new DBText();
+                    elementText.Position = new Point3d(geoCenter.X, geoMin.Y - textOffset, geoCenter.Z);  // Text above dimension
+                    elementText.Height = 30;  // Font size 30mm to match Phase 1
+                    elementText.TextString = elementInfo;
+                    elementText.HorizontalMode = TextHorizontalMode.TextCenter;
+                    elementText.VerticalMode = TextVerticalMode.TextTop;
+                    elementText.AlignmentPoint = elementText.Position;
+                    elementText.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                        Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow
+
+                    btr.AppendEntity(elementText);
+                    tr.AddNewlyCreatedDBObject(elementText, true);
+                }
+            }
+
+            // Skip dimension creation for PL (Plate) profiles - they only need the leader label
+            if (elementInfo.StartsWith("PL", StringComparison.OrdinalIgnoreCase))
+            {
+                ed.WriteMessage($"\n  - Beam profile: {standardDims.ProfileName}");
+                ed.WriteMessage($"\n  - Drawing length: {actualLength:F0} mm");
+                ed.WriteMessage($"\n  - Drawing height: {actualHeight:F0} mm");
+                ed.WriteMessage($"\n  - Standard width: {standardDims.Width:F0} mm");
+                ed.WriteMessage($"\n  - Standard height: {standardDims.Height:F0} mm");
+                ed.WriteMessage("\n  ✓ Skipping dimensions for PL profile (leader only)");
+                return;  // Exit early - no dimensions for plates
+            }
+
+            // Create horizontal dimension showing ACTUAL drawing length (below text)
+            // Points at beam edges for extension lines to connect
+            Point3d dimLineStart = new Point3d(geoMin.X, geoMin.Y, 0);
+            Point3d dimLineEnd = new Point3d(geoMax.X, geoMin.Y, 0);
+            // Dimension line position (offset below beam)
+            Point3d dimLinePos = new Point3d(geoCenter.X, geoMin.Y - dimOffset, 0);
+
+            RotatedDimension lengthDim = new RotatedDimension(
+                0, dimLineStart, dimLineEnd, dimLinePos, "", ObjectId.Null);
+            lengthDim.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red (overall)
+            lengthDim.Dimclrd = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red dimension line
+            lengthDim.Dimclre = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red extension line
+            lengthDim.Dimclrt = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow text
+
+            btr.AppendEntity(lengthDim);
+            tr.AddNewlyCreatedDBObject(lengthDim, true);
+
+            // Create vertical dimension showing ACTUAL drawing height (left side)
+            // Points at beam edges for extension lines to connect
+            Point3d vertDimStart = new Point3d(geoMin.X, geoMin.Y, 0);
+            Point3d vertDimEnd = new Point3d(geoMin.X, geoMax.Y, 0);
+            // Dimension line position (offset to the left)
+            Point3d vertDimPos = new Point3d(geoMin.X - dimOffset, geoCenter.Y, 0);
+
+            RotatedDimension heightDim = new RotatedDimension(
+                Math.PI / 2, vertDimStart, vertDimEnd, vertDimPos, "", ObjectId.Null);
+            heightDim.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red (overall)
+            heightDim.Dimclrd = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red dimension line
+            heightDim.Dimclre = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 1); // Red extension line
+            heightDim.Dimclrt = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow text
+
+            btr.AppendEntity(heightDim);
+            tr.AddNewlyCreatedDBObject(heightDim, true);
+
+            ed.WriteMessage($"\n  - Beam profile: {elementInfo}");
+            ed.WriteMessage($"\n  - Drawing length: {actualLength:F0} mm");
+            ed.WriteMessage($"\n  - Drawing height: {actualHeight:F0} mm");
+            ed.WriteMessage($"\n  - Standard width: {standardDims.Width} mm");
+            ed.WriteMessage($"\n  - Standard height: {standardDims.Height} mm");
+        }
+
+        /// <summary>
+        /// Process pipes (circles) to create diameter annotations with wall thickness
+        /// Uses LINEAR METHOD: measures actual geometry and matches to closest standard pipe
+        /// </summary>
+        private void ProcessPipes(Transaction tr, Database db, Editor ed, List<Circle> circles, string layerName)
+        {
+            BlockTable bt = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
+            BlockTableRecord btr = tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+
+            ed.WriteMessage($"\n✓ Processing {circles.Count} pipes using LINEAR METHOD (geometry-based calculation)");
+
+            foreach (Circle circle in circles)
+            {
+                Point3d center = circle.Center;
+                double measuredDiameter = circle.Radius * 2;
+
+                // LINEAR METHOD: Find closest standard pipe based on measured diameter
+                PipeDimensions matchedPipe = FindClosestStandardPipe(measuredDiameter);
+
+                double displayDiameter;
+                double wallThickness;
+                string annotationText;
+                string pipeLabel;
+
+                if (matchedPipe != null)
+                {
+                    // Use matched standard pipe dimensions
+                    displayDiameter = matchedPipe.OuterDiameter;
+                    wallThickness = matchedPipe.WallThickness;
+                    pipeLabel = matchedPipe.DisplayName;
+                    annotationText = $"ø{displayDiameter:F1}*{wallThickness:F2}";
+
+                    ed.WriteMessage($"\n  - Pipe: {pipeLabel} - Ø{displayDiameter:F1} × {wallThickness:F2} mm (Measured: Ø{measuredDiameter:F1} mm)");
+                }
+                else
+                {
+                    // Fallback: use measured geometry with estimated wall thickness
+                    displayDiameter = measuredDiameter;
+                    wallThickness = EstimatePipeWallThickness(measuredDiameter);
+                    annotationText = $"ø{displayDiameter:F1}*{wallThickness:F2}";
+
+                    ed.WriteMessage($"\n  - Pipe: Ø{displayDiameter:F1} × {wallThickness:F2} mm (No standard match found)");
+                }
+
+                // Create diameter text with wall thickness next to the pipe (vertical orientation)
+                // ADJUSTED SIZES to match reference image
+                DBText diamText = new DBText();
+                diamText.Position = new Point3d(center.X + circle.Radius + 6, center.Y, center.Z);  // 6mm offset from pipe edge - very close
+                diamText.Height = 15;  // Increased to 15 for better visibility
+                diamText.TextString = annotationText;
+                diamText.Rotation = Math.PI / 2; // 90 degrees - vertical text
+                diamText.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(
+                    Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 2); // Yellow
+
+                btr.AppendEntity(diamText);
+                tr.AddNewlyCreatedDBObject(diamText, true);
+            }
+        }
+
+        /// <summary>
+        /// Find the closest standard pipe based on measured diameter (LINEAR METHOD)
+        /// </summary>
+        private PipeDimensions FindClosestStandardPipe(double measuredDiameter)
+        {
+            PipeDimensions closestPipe = null;
+            double minDifference = double.MaxValue;
+
+            foreach (var pipe in StandardPipes.Values)
+            {
+                double difference = Math.Abs(pipe.OuterDiameter - measuredDiameter);
+
+                if (difference < minDifference)
+                {
+                    minDifference = difference;
+                    closestPipe = pipe;
+                }
+            }
+
+            // Only return a match if it's within reasonable tolerance (±5mm)
+            if (closestPipe != null && minDifference <= 5.0)
+            {
+                return closestPipe;
+            }
+
+            return null; // No close match found
+        }
+
+        /// <summary>
+        /// Estimate pipe wall thickness based on outer diameter
+        /// Using typical steel pipe schedule 40 values
+        /// </summary>
+        private double EstimatePipeWallThickness(double outerDiameter)
+        {
+            // Common pipe sizes and wall thicknesses (Schedule 40)
+            if (outerDiameter <= 35) return 2.77;      // 1/2" - 1"
+            if (outerDiameter <= 50) return 3.68;      // 1.5"
+            if (outerDiameter <= 65) return 3.91;      // 2"
+            if (outerDiameter <= 90) return 5.49;      // 2.5" - 3"
+            if (outerDiameter <= 115) return 6.02;     // 4" (114.3mm OD)
+            if (outerDiameter <= 145) return 6.55;     // 5"
+            if (outerDiameter <= 170) return 7.11;     // 6"
+            if (outerDiameter <= 220) return 8.18;     // 8"
+            if (outerDiameter <= 275) return 9.27;     // 10"
+            if (outerDiameter <= 325) return 10.31;    // 12"
+
+            return 6.0; // Default
+        }
+
+        /// <summary>
+        /// Extracts element information from layer name
+        /// Examples: "P23-HE140A Euro-1-C1837" -> "HE140A"
+        ///           "HE140A Euro-1-C2134" -> "HE140A"
+        ///           "PRIMARY STRUCTURE-PL500X45" -> "PL500X45"
+        /// </summary>
+        private string ExtractElementFromLayerName(string layerName)
+        {
+            // Pattern to match structural element names like HE140A, HEA140, IPE200, PL500X45, etc.
+            // This pattern looks for common structural steel profiles
+            var patterns = new[]
+            {
+                @"PL\d+X\d+",   // Matches PL500X45, PL400X30, etc. (Plate profiles)
+                @"HE\d+A",      // Matches HE140A, HE200A, etc.
+                @"HEA\d+",      // Matches HEA140, HEA200, etc.
+                @"HEB\d+",      // Matches HEB140, HEB200, etc.
+                @"HEM\d+",      // Matches HEM140, HEM200, etc.
+                @"IPE\d+",      // Matches IPE200, IPE300, etc.
+                @"UPN\d+",      // Matches UPN200, UPN300, etc.
+                @"[A-Z]{2,3}\d+[A-Z]?"  // General pattern for structural profiles
+            };
+
+            foreach (var pattern in patterns)
+            {
+                Match match = Regex.Match(layerName, pattern, RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    return match.Value.ToUpper();  // Return uppercase for consistency
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Extracts pipe size from layer name
+        /// Examples: "SA_PIPE-1-C3226" -> "1"
+        ///           "PIPE-2.5-C1234" -> "2.5"
+        ///           "SA_PIPE-3-Euro" -> "3"
+        /// </summary>
+        private string ExtractPipeSizeFromLayerName(string layerName)
+        {
+            // Pattern to match PIPE-X where X is the nominal size
+            // Matches: PIPE-1, PIPE-2, PIPE-2.5, PIPE-0.5, etc.
+            var pattern = @"PIPE[-_](\d+(?:\.\d+)?)";
+
+            Match match = Regex.Match(layerName, pattern, RegexOptions.IgnoreCase);
+            if (match.Success && match.Groups.Count > 1)
+            {
+                return match.Groups[1].Value;  // Return the captured pipe size
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Check if a closed polyline is circular (represents a pipe)
+        /// </summary>
+        private bool IsCircularPolyline(Polyline pline)
+        {
+            if (!pline.Closed) return false;
+
+            // Check if all vertices are approximately equidistant from center
+            Point3d center = GetPolylineCenter(pline);
+            double? firstRadius = null;
+            double tolerance = 1.0; // 1mm tolerance
+
+            for (int i = 0; i < pline.NumberOfVertices; i++)
+            {
+                Point3d vertex = pline.GetPoint3dAt(i);
+                double distance = center.DistanceTo(vertex);
+
+                if (!firstRadius.HasValue)
+                {
+                    firstRadius = distance;
+                }
+                else
+                {
+                    // Check if all vertices are roughly the same distance from center
+                    if (Math.Abs(distance - firstRadius.Value) > tolerance)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Get the center point of a polyline
+        /// </summary>
+        private Point3d GetPolylineCenter(Polyline pline)
+        {
+            Extents3d bounds = pline.GeometricExtents;
+            return new Point3d(
+                (bounds.MinPoint.X + bounds.MaxPoint.X) / 2,
+                (bounds.MinPoint.Y + bounds.MaxPoint.Y) / 2,
+                (bounds.MinPoint.Z + bounds.MaxPoint.Z) / 2
+            );
+        }
+
+        /// <summary>
+        /// Get the radius of a circular polyline
+        /// </summary>
+        private double GetPolylineRadius(Polyline pline, Point3d center)
+        {
+            if (pline.NumberOfVertices == 0) return 0;
+
+            double totalRadius = 0;
+            int count = 0;
+
+            for (int i = 0; i < pline.NumberOfVertices; i++)
+            {
+                Point3d vertex = pline.GetPoint3dAt(i);
+                totalRadius += center.DistanceTo(vertex);
+                count++;
+            }
+
+            return count > 0 ? totalRadius / count : 0;
+        }
+
+        /// <summary>
+        /// Detect circular patterns from Line entities (LINEAR METHOD)
+        /// Groups lines spatially and identifies circular shapes
+        /// </summary>
+        private List<Circle> DetectCircularPatternsFromLines(List<Line> lines, Editor ed)
+        {
+            List<Circle> detectedCircles = new List<Circle>();
+
+            // Group lines by spatial clustering
+            ed.WriteMessage($"\n\nStep 1: Clustering {lines.Count} lines by spatial proximity...");
+            List<List<Line>> clusters = ClusterLinesBySpatialProximity(lines);
+
+            ed.WriteMessage($"\n  ✓ Detected {clusters.Count} spatial clusters");
+
+            // Show cluster size distribution
+            ed.WriteMessage($"\n\nStep 2: Analyzing each cluster for circularity...");
+            ed.WriteMessage($"\n  Cluster sizes: ");
+            for (int i = 0; i < Math.Min(10, clusters.Count); i++)
+            {
+                ed.WriteMessage($"{clusters[i].Count}, ");
+            }
+            if (clusters.Count > 10) ed.WriteMessage($"... ({clusters.Count} total clusters)");
+
+            int clusterIndex = 0;
+            int circularClusters = 0;
+            int rejectedTooSmall = 0;
+            int rejectedAspectRatio = 0;
+            int rejectedRadius = 0;
+            int rejectedCircularity = 0;
+
+            foreach (var cluster in clusters)
+            {
+                clusterIndex++;
+
+                // Skip very small clusters (likely not circles)
+                if (cluster.Count < 4)
+                {
+                    rejectedTooSmall++;
+                    continue;
+                }
+
+                // Get bounding box of this cluster
+                Extents3d? bounds = GetClusterBounds(cluster);
+                if (!bounds.HasValue) continue;
+
+                Point3d min = bounds.Value.MinPoint;
+                Point3d max = bounds.Value.MaxPoint;
+
+                // Calculate dimensions
+                double width = max.X - min.X;
+                double height = max.Y - min.Y;
+                double aspectRatio = width > 0 ? height / width : 0;
+
+                // Check if it's roughly square (circular)
+                // Allow some tolerance for aspect ratio (0.7 to 1.3)
+                if (aspectRatio < 0.7 || aspectRatio > 1.3)
+                {
+                    rejectedAspectRatio++;
+                    continue;
+                }
+
+                // Calculate center
+                Point3d center = new Point3d(
+                    (min.X + max.X) / 2,
+                    (min.Y + max.Y) / 2,
+                    (min.Z + max.Z) / 2
+                );
+
+                // Calculate average radius from all line endpoints
+                double totalRadius = 0;
+                int pointCount = 0;
+
+                foreach (Line line in cluster)
+                {
+                    totalRadius += center.DistanceTo(line.StartPoint);
+                    totalRadius += center.DistanceTo(line.EndPoint);
+                    pointCount += 2;
+                }
+
+                double avgRadius = pointCount > 0 ? totalRadius / pointCount : 0;
+
+                // Only accept if radius is reasonable (pipes typically 10mm to 500mm diameter)
+                // Radius range: 5mm (10mm diameter) to 250mm (500mm diameter)
+                if (avgRadius < 10 || avgRadius > 250)
+                {
+                    rejectedRadius++;
+                    continue;
+                }
+
+                // Verify circularity - check if points are roughly equidistant from center
+                bool isCircular = VerifyCircularity(cluster, center, avgRadius);
+
+                if (isCircular)
+                {
+                    Circle detectedCircle = new Circle(center, Vector3d.ZAxis, avgRadius);
+                    detectedCircles.Add(detectedCircle);
+                    circularClusters++;
+                    ed.WriteMessage($"\n  ✓ Cluster #{clusterIndex}: CIRCLE DETECTED - {cluster.Count} lines, Ø{avgRadius * 2:F1}mm at ({center.X:F0}, {center.Y:F0})");
+                }
+                else
+                {
+                    rejectedCircularity++;
+                }
+            }
+
+            ed.WriteMessage($"\n\nStep 3: Results Summary");
+            ed.WriteMessage($"\n  Total clusters analyzed: {clusters.Count}");
+            ed.WriteMessage($"\n  ✓ Circular patterns found: {circularClusters}");
+            ed.WriteMessage($"\n  ✗ Rejected (too small): {rejectedTooSmall}");
+            ed.WriteMessage($"\n  ✗ Rejected (aspect ratio): {rejectedAspectRatio}");
+            ed.WriteMessage($"\n  ✗ Rejected (radius out of range): {rejectedRadius}");
+            ed.WriteMessage($"\n  ✗ Rejected (not circular): {rejectedCircularity}");
+
+            return detectedCircles;
+        }
+
+        /// <summary>
+        /// Cluster lines by spatial proximity (simple spatial grouping)
+        /// </summary>
+        private List<List<Line>> ClusterLinesBySpatialProximity(List<Line> lines)
+        {
+            List<List<Line>> clusters = new List<List<Line>>();
+            List<Line> remainingLines = new List<Line>(lines);
+
+            double proximityThreshold = 5; // 5mm threshold for grouping (tight grouping for individual pipes)
+
+            while (remainingLines.Count > 0)
+            {
+                List<Line> currentCluster = new List<Line>();
+                currentCluster.Add(remainingLines[0]);
+                remainingLines.RemoveAt(0);
+
+                bool foundNearby = true;
+                while (foundNearby)
+                {
+                    foundNearby = false;
+
+                    for (int i = remainingLines.Count - 1; i >= 0; i--)
+                    {
+                        Line candidate = remainingLines[i];
+
+                        // Check if this line is close to any line in current cluster
+                        foreach (Line clusterLine in currentCluster)
+                        {
+                            double dist = GetMinDistanceBetweenLines(candidate, clusterLine);
+
+                            if (dist < proximityThreshold)
+                            {
+                                currentCluster.Add(candidate);
+                                remainingLines.RemoveAt(i);
+                                foundNearby = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                clusters.Add(currentCluster);
+            }
+
+            return clusters;
+        }
+
+        /// <summary>
+        /// Get minimum distance between two lines
+        /// </summary>
+        private double GetMinDistanceBetweenLines(Line line1, Line line2)
+        {
+            // Calculate minimum distance between any endpoints
+            double d1 = line1.StartPoint.DistanceTo(line2.StartPoint);
+            double d2 = line1.StartPoint.DistanceTo(line2.EndPoint);
+            double d3 = line1.EndPoint.DistanceTo(line2.StartPoint);
+            double d4 = line1.EndPoint.DistanceTo(line2.EndPoint);
+
+            return Math.Min(Math.Min(d1, d2), Math.Min(d3, d4));
+        }
+
+        /// <summary>
+        /// Get bounding box of a cluster of lines
+        /// </summary>
+        private Extents3d? GetClusterBounds(List<Line> cluster)
+        {
+            if (cluster.Count == 0) return null;
+
+            Point3d min = cluster[0].StartPoint;
+            Point3d max = cluster[0].StartPoint;
+
+            foreach (Line line in cluster)
+            {
+                UpdateMinMax(ref min, ref max, line.StartPoint);
+                UpdateMinMax(ref min, ref max, line.EndPoint);
+            }
+
+            return new Extents3d(min, max);
+        }
+
+        /// <summary>
+        /// Helper to update min/max points
+        /// </summary>
+        private void UpdateMinMax(ref Point3d min, ref Point3d max, Point3d point)
+        {
+            min = new Point3d(
+                Math.Min(min.X, point.X),
+                Math.Min(min.Y, point.Y),
+                Math.Min(min.Z, point.Z)
+            );
+            max = new Point3d(
+                Math.Max(max.X, point.X),
+                Math.Max(max.Y, point.Y),
+                Math.Max(max.Z, point.Z)
+            );
+        }
+
+        /// <summary>
+        /// Verify if a cluster of lines forms a circular pattern
+        /// </summary>
+        private bool VerifyCircularity(List<Line> cluster, Point3d center, double expectedRadius)
+        {
+            double tolerance = expectedRadius * 0.15; // 15% tolerance
+            int validPoints = 0;
+            int totalPoints = 0;
+
+            foreach (Line line in cluster)
+            {
+                double dist1 = center.DistanceTo(line.StartPoint);
+                double dist2 = center.DistanceTo(line.EndPoint);
+
+                totalPoints += 2;
+
+                if (Math.Abs(dist1 - expectedRadius) < tolerance) validPoints++;
+                if (Math.Abs(dist2 - expectedRadius) < tolerance) validPoints++;
+            }
+
+            // At least 70% of points should be near the expected radius
+            return totalPoints > 0 && ((double)validPoints / totalPoints) >= 0.7;
+        }
+
+    }
+}

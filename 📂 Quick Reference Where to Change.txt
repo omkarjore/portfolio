@@ -1,0 +1,38 @@
+ 📂 Quick Reference: Where to Change What
+
+  | What to Change | File Location                   | Line            |
+  |----------------|---------------------------------|-----------------|
+  | Your Photo     | src/components/ui/About.tsx     | Line 24         |
+  | Bio/About      | src/components/ui/About.tsx     | Line 35         |
+  | Skills         | src/components/ui/Skills.tsx    | Line 6          |
+  | Education      | src/components/ui/Education.tsx | Line 24         |
+  | Awards         | src/components/ui/Awards.tsx    | Line 22         |
+  | Contact Info   | src/components/ui/Contact.tsx   | Line 37         |
+  | Projects       | src/data/projects.ts            | Line 5          |
+  | Resume PDF     | public/resume.pdf               | (add file here) |
+  | Profile Photo  | public/profile-photo.jpg        | (add file here) |
+
+  ---
+  📖 Full Documentation
+
+  I've created: HOW-TO-CUSTOMIZE.md
+
+  Open it in your project folder - it has:
+  - ✅ Complete tech stack list
+  - ✅ Step-by-step photo upload guide
+  - ✅ Detailed instructions for every section
+  - ✅ Vercel security explanation
+  - ✅ Project structure overview
+  - ✅ Troubleshooting tips
+
+  ---
+  🎯 Summary
+
+  1. Vercel is SAFE - Used by Netflix, Nike, Uber, etc.
+  2. Your photo: Add to public/profile-photo.jpg and update About.tsx
+  3. Change skills: Edit src/components/ui/Skills.tsx
+  4. Change anything: Edit the files listed in the table above
+  5. Deploy: git add . && git commit -m "message" && git push
+
+  You are completely safe using Vercel! It's one of the most trusted platforms in web development. 🛡️
+

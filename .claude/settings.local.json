@@ -10,7 +10,12 @@
       "Bash(npm run build:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git config:*)",
+      "Bash(gh auth status:*)",
+      "Bash(for file in About.tsx Skills.tsx Education.tsx Awards.tsx Contact.tsx)",
+      "Bash(do sed:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
